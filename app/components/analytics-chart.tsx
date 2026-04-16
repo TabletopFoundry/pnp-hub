@@ -12,13 +12,13 @@ type AnalyticsChartProps = {
 export function AnalyticsChart({ metrics, geography }: AnalyticsChartProps) {
   return (
     <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
-      <div className="paper-panel rounded-[1.8rem] border border-[rgba(77,57,36,0.08)] p-5">
+      <div className="paper-panel rounded-[1.8rem] border border-[var(--border-light)] p-5" role="figure" aria-label="Downloads over time chart showing 14-day release pulse">
         <div className="mb-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Downloads over time</p>
             <h3 className="mt-2 text-xl font-semibold text-[var(--ink)]">14-day release pulse</h3>
           </div>
-          <span className="rounded-full bg-[rgba(54,90,76,0.12)] px-3 py-1 text-xs font-semibold text-[var(--forest)]">Updated daily</span>
+          <span className="rounded-full bg-[var(--bg-forest-tint)] px-3 py-1 text-xs font-semibold text-[var(--forest)]">Updated daily</span>
         </div>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -38,7 +38,7 @@ export function AnalyticsChart({ metrics, geography }: AnalyticsChartProps) {
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="paper-panel rounded-[1.8rem] border border-[rgba(77,57,36,0.08)] p-5">
+      <div className="paper-panel rounded-[1.8rem] border border-[var(--border-light)] p-5" role="figure" aria-label="Geographic distribution chart showing where makers are printing">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Geographic mix</p>
         <h3 className="mt-2 text-xl font-semibold text-[var(--ink)]">Where makers are printing</h3>
         <div className="mt-4 h-72">

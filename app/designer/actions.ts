@@ -4,8 +4,15 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { createDraftGame } from '@/lib/db';
+import type { AccessType, GameCategory } from '@/lib/types';
 
-export async function createDesignerSubmission(formData: FormData) {
+const MAX_TITLE = 200;
+const MAX_DESCRIPTION = 5000;
+
+const VALID_CATEGORIES: GameCategory[] = ['Strategy', 'Party', 'Family', 'Solo', 'Cooperative', 'Card'];
+const VALID_ACCESS_TYPES: AccessType[] = ['free', 'included', 'purchase'];
+
+export async function createDesignerSubmission(formData: FormData): Promise<{ error: string } | null> {
   const title = String(formData.get('title') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
   const category = String(formData.get('category') ?? 'Strategy');
@@ -13,11 +20,35 @@ export async function createDesignerSubmission(formData: FormData) {
   const priceDollars = Number(formData.get('price') ?? '0');
   const files = formData
     .getAll('files')
-    .filter((value): value is File => value instanceof File && value.size >= 0 && value.name.length > 0)
+    .filter((value): value is File => value instanceof File && value.size > 0 && value.name.length > 0)
     .map((file) => file.name);
 
+  // Required fields
   if (!title || !description) {
-    redirect('/designer?error=Please+complete+the+name+and+description+fields');
+    return { error: 'Please complete the name and description fields.' };
+  }
+
+  // Length limits
+  if (title.length > MAX_TITLE) {
+    return { error: `Title must be under ${MAX_TITLE} characters.` };
+  }
+  if (description.length > MAX_DESCRIPTION) {
+    return { error: `Description must be under ${MAX_DESCRIPTION} characters.` };
+  }
+
+  // Validate category against known values
+  if (!VALID_CATEGORIES.includes(category as GameCategory)) {
+    return { error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}.` };
+  }
+
+  // Validate access type against known values
+  if (!VALID_ACCESS_TYPES.includes(accessType as AccessType)) {
+    return { error: `Invalid access type. Must be one of: ${VALID_ACCESS_TYPES.join(', ')}.` };
+  }
+
+  // Validate price for purchase type
+  if (accessType === 'purchase' && (isNaN(priceDollars) || priceDollars <= 0)) {
+    return { error: 'Purchase games must have a price greater than $0.' };
   }
 
   createDraftGame({

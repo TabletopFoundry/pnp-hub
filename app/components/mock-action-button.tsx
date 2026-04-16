@@ -14,11 +14,13 @@ export function MockActionButton({ defaultLabel, activeLabel, className }: MockA
   return (
     <button
       type="button"
+      disabled={active}
       onClick={() => {
         setActive(true);
         window.setTimeout(() => setActive(false), 1600);
       }}
-      className={className}
+      aria-live="polite"
+      className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}
     >
       {active ? activeLabel : defaultLabel}
     </button>

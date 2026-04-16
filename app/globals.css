@@ -6,12 +6,40 @@
   --paper: #fbf6ed;
   --paper-strong: #efe1c4;
   --sand: #d8b98f;
-  --terracotta: #b56e4f;
+  --terracotta: #9a5a3e;
   --forest: #365a4c;
   --ink: #3a2b1f;
   --rose: #d68b7c;
   --gold: #d8a541;
   --shadow: rgba(83, 58, 34, 0.14);
+
+  /* Text colors — WCAG AA compliant on --paper (#fbf6ed) */
+  --text-body: rgba(58, 43, 31, 0.88);
+  --text-secondary: rgba(58, 43, 31, 0.84);
+  --text-strong: rgba(58, 43, 31, 0.92);
+  --text-muted: rgba(58, 43, 31, 0.72);
+
+  /* Border colors */
+  --border-light: rgba(77, 57, 36, 0.08);
+  --border-medium: rgba(77, 57, 36, 0.12);
+  --border-dashed: rgba(77, 57, 36, 0.18);
+  --border-dashed-strong: rgba(77, 57, 36, 0.2);
+  --border-accent: rgba(77, 57, 36, 0.14);
+
+  /* Background tints */
+  --bg-forest-tint: rgba(54, 90, 76, 0.12);
+  --bg-forest-subtle: rgba(54, 90, 76, 0.1);
+  --bg-forest-strong: rgba(54, 90, 76, 0.16);
+  --bg-gold-tint: rgba(216, 165, 65, 0.12);
+  --bg-gold-subtle: rgba(216, 165, 65, 0.1);
+  --bg-gold-medium: rgba(216, 165, 65, 0.14);
+  --bg-gold-strong: rgba(216, 165, 65, 0.18);
+  --bg-terracotta-tint: rgba(154, 90, 62, 0.12);
+  --bg-terracotta-subtle: rgba(154, 90, 62, 0.1);
+  --bg-terracotta-strong: rgba(154, 90, 62, 0.16);
+  --bg-blue-tint: rgba(108, 138, 168, 0.16);
+  --bg-banner: rgba(255, 248, 240, 0.78);
+  --bg-header: rgba(251, 246, 237, 0.92);
 }
 
 * {
@@ -94,4 +122,21 @@ textarea {
 .focus-ring:focus-visible {
   outline: 3px solid rgba(54, 90, 76, 0.3);
   outline-offset: 2px;
+}
+
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.75rem 1.5rem;
+  background: var(--forest);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0 0 1rem 0;
+}
+
+.skip-to-content:focus {
+  left: 0;
 }

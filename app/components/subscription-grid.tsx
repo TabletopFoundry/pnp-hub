@@ -28,16 +28,16 @@ export function SubscriptionGrid() {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
       {tiers.map((tier) => (
-        <article key={tier.name} className="paper-panel rounded-[1.8rem] border border-[rgba(77,57,36,0.08)] p-6">
+        <article key={tier.name} className="paper-panel rounded-[1.8rem] border border-[var(--border-light)] p-6" aria-label={`${tier.name} subscription tier at ${tier.price}`}>
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-2xl font-semibold text-[var(--ink)]">{tier.name}</h3>
-            <span className="rounded-full bg-[rgba(216,165,65,0.14)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink)]">
+            <span className="rounded-full bg-[var(--bg-gold-medium)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink)]">
               {tier.badge}
             </span>
           </div>
           <p className="mt-4 text-4xl font-semibold text-[var(--terracotta)]">{tier.price}</p>
-          <p className="mt-4 text-sm leading-6 text-[rgba(58,43,31,0.74)]">{tier.description}</p>
-          <ul className="mt-5 space-y-3 text-sm text-[rgba(58,43,31,0.82)]">
+          <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)]">{tier.description}</p>
+          <ul className="mt-5 space-y-3 text-sm text-[var(--text-strong)]">
             {tier.features.map((feature) => (
               <li key={feature} className="flex gap-2">
                 <span className="mt-1 text-[var(--forest)]">•</span>
