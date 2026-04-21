@@ -27,6 +27,7 @@ export function OptimizerTool({ games, initialSlug, compact = false }: Optimizer
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate from localStorage on mount
         setProfile(JSON.parse(saved) as PrinterProfile);
       }
     } catch { /* ignore malformed data */ }

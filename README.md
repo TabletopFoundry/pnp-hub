@@ -1,42 +1,96 @@
-# PnP Hub MVP
+# 🎲 PnP Hub
 
-PnP Hub is a craft-inspired print-and-play marketplace MVP built with Next.js App Router, TypeScript, Tailwind CSS, Recharts, and SQLite via `better-sqlite3`.
+> A craft-inspired print-and-play board game marketplace — discover, optimize, and print tabletop games at home.
 
-## Features
+[![CI](https://github.com/your-username/pnp-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/pnp-hub/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 
-- Landing page with hero, featured games, subscription tiers, and designer CTA
-- Marketplace with 30+ seeded games, search, filters, sorting, badges, empty states, and responsive cards
-- Game detail pages with previews, reviews, component lists, download mock, and print optimizer summary
-- Interactive print optimizer with saved printer profile defaults, layout preview, cost estimates, and cutting guidance
-- Designer dashboard with upload wizard, SQLite-backed draft persistence, analytics charts, geography breakdown, and 75/25 revenue split
-- Community page with craft gallery, tutorial library, monthly craft-along spotlight, and subscription comparison
+---
 
-## Tech stack
+## ✨ Features
 
-- Next.js 16 App Router + React 19
-- TypeScript
-- Tailwind CSS 4
-- SQLite (`better-sqlite3`)
-- Recharts
+| Surface | What it does |
+|---------|-------------|
+| **Marketplace** | Browse 30+ seeded games with search, filters, sorting, badges, and responsive cards |
+| **Game Details** | Preview art, read reviews, view component lists, and check print profiles |
+| **Print Optimizer** | Choose paper size, color mode, preview layouts, estimate costs, and get cutting guidance |
+| **Designer Dashboard** | Upload games, track downloads/revenue, view geography analytics (75/25 split) |
+| **Community** | Craft gallery, tutorial library, monthly craft-along spotlight |
 
-## Getting started
+## 🚀 Quick Start
+
+**Prerequisites:** [Node.js](https://nodejs.org/) ≥ 22
 
 ```bash
+# Install dependencies
 npm install
+
+# Start the dev server
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open **http://localhost:3000** — the SQLite database auto-seeds with 30+ games on first run.
 
-## Data model notes
+## 🏗️ Tech Stack
 
-- The SQLite database lives at `data/pnp-hub.db`
-- The database auto-seeds on first run with marketplace titles, reviews, tutorials, craft gallery entries, and designer analytics
-- Designer uploads create draft game records in SQLite so submissions persist across refreshes
+| Layer | Technology |
+|-------|-----------|
+| Framework | [Next.js 16](https://nextjs.org/) (App Router) + [React 19](https://react.dev/) |
+| Language | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
+| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
+| Database | [SQLite](https://www.sqlite.org/) via [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) |
+| Charts | [Recharts](https://recharts.org/) |
+| Testing | [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/) |
 
-## Scripts
+## 📁 Project Structure
 
-- `npm run dev` — start the development server
-- `npm run build` — create a production build
-- `npm run start` — run the production server
-- `npm run lint` — run ESLint
+```
+app/                      # Next.js App Router
+├── components/           # Shared UI components
+├── community/            # Community hub page
+├── designer/             # Designer dashboard + server actions
+├── games/[slug]/         # Dynamic game detail pages
+├── marketplace/          # Marketplace browse with filters
+├── optimizer/            # Print optimizer tool
+├── layout.tsx            # Root layout with nav + footer
+└── page.tsx              # Landing page
+lib/                      # Core business logic
+├── data.ts               # Database query helpers
+├── db.ts                 # SQLite connection, schema, seeding
+├── format.ts             # Display formatting utilities
+├── seed.ts               # Demo catalog seed data
+└── types.ts              # TypeScript type definitions
+docs/                     # Project documentation
+__tests__/                # Test files
+```
+
+## 📜 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm run start` | Run the production server |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm test` | Run tests once |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run validate` | Run lint + typecheck + tests |
+
+## 💾 Data Model
+
+- The SQLite database lives at `data/pnp-hub.db` and auto-seeds on first run
+- Seed data includes marketplace titles, reviews, tutorials, craft gallery entries, and designer analytics
+- Designer uploads create draft game records in SQLite, persisting across refreshes
+- Database uses WAL journal mode for better concurrent read performance
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## 📄 License
+
+[MIT](LICENSE) © PnP Hub Contributors

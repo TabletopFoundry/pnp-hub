@@ -15,8 +15,12 @@ export function MobileNav({ items }: MobileNavProps) {
   const drawerRef = useRef<HTMLElement>(null);
 
   // Close drawer on route change
+  const prevPathname = useRef(pathname);
   useEffect(() => {
-    setOpen(false);
+    if (pathname !== prevPathname.current) {
+      prevPathname.current = pathname;
+      setOpen(false);
+    }
   }, [pathname]);
 
   // Prevent body scroll when drawer is open
@@ -61,12 +65,12 @@ export function MobileNav({ items }: MobileNavProps) {
     if (e.shiftKey) {
       if (document.activeElement === first) {
         e.preventDefault();
-        last.focus();
+        last?.focus();
       }
     } else {
       if (document.activeElement === last) {
         e.preventDefault();
-        first.focus();
+        first?.focus();
       }
     }
   }, []);
