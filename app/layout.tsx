@@ -60,13 +60,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 designer tooling, print workflow, and community surfaces from the PnP Hub PRD.
               </p>
             </div>
-            <div className="grid gap-3 text-sm text-[var(--text-body)] sm:grid-cols-2">
+            <nav aria-label="Footer navigation" className="grid gap-3 text-sm text-[var(--text-body)] sm:grid-cols-2">
               {navigation.map((item) => (
                 <Link key={item.href} href={item.href} className="focus-ring rounded-2xl px-4 py-3 transition hover:bg-white/70">
                   {item.label}
                 </Link>
               ))}
-            </div>
+            </nav>
           </div>
         </footer>
       </body>

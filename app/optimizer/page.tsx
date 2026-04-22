@@ -1,7 +1,14 @@
+import type { Metadata } from 'next';
+
 import { OptimizerTool } from '@/app/components/optimizer-tool';
 import { getOptimizerGames } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Print Optimizer — PnP Hub',
+  description: 'Optimize your print-and-play game layouts to save paper and ink.',
+};
 
 type OptimizerPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

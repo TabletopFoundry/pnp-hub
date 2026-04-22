@@ -1,18 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 import { createDraftGame } from '@/lib/db';
 import type { AccessType, GameCategory } from '@/lib/types';
 
+export type SubmissionResult = { error?: string; success?: boolean } | null;
+
 const MAX_TITLE = 200;
 const MAX_DESCRIPTION = 5000;
 
-const VALID_CATEGORIES: GameCategory[] = ['Strategy', 'Party', 'Family', 'Solo', 'Cooperative', 'Card'];
+const VALID_CATEGORIES = ['Strategy', 'Party', 'Family', 'Solo', 'Cooperative', 'Card', 'Educational', '2-Player'] as const satisfies readonly GameCategory[];
 const VALID_ACCESS_TYPES: AccessType[] = ['free', 'included', 'purchase'];
 
-export async function createDesignerSubmission(formData: FormData): Promise<{ error: string } | null> {
+export async function createDesignerSubmission(formData: FormData): Promise<SubmissionResult> {
   const title = String(formData.get('title') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
   const category = String(formData.get('category') ?? 'Strategy');
@@ -37,7 +38,7 @@ export async function createDesignerSubmission(formData: FormData): Promise<{ er
   }
 
   // Validate category against known values
-  if (!VALID_CATEGORIES.includes(category as GameCategory)) {
+  if (!(VALID_CATEGORIES as readonly string[]).includes(category)) {
     return { error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}.` };
   }
 
@@ -61,5 +62,5 @@ export async function createDesignerSubmission(formData: FormData): Promise<{ er
   });
 
   revalidatePath('/designer');
-  redirect('/designer?submitted=1');
+  return { success: true };
 }

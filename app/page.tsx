@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 import { GameCard } from '@/app/components/game-card';
 import { MockActionButton } from '@/app/components/mock-action-button';
@@ -6,6 +7,11 @@ import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { getFeaturedGames, getMonthlyCraftGame } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'PnP Hub — Print-and-Play Board Game Marketplace',
+  description: 'Discover, buy, and optimize beautifully merchandised print-and-play board games.',
+};
 
 const categories = ['Strategy', 'Party', 'Solo', 'Family', 'Educational', 'Cooperative', '2-Player'];
 

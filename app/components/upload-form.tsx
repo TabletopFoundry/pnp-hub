@@ -1,19 +1,29 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { createDesignerSubmission } from '@/app/designer/actions';
+import { createDesignerSubmission, type SubmissionResult } from '@/app/designer/actions';
 import { UploadSubmitButton } from '@/app/components/upload-submit-button';
 
-type FormState = { error: string } | null;
-
 export function UploadForm() {
-  const [state, formAction] = useActionState<FormState, FormData>(
-    async (_prev: FormState, formData: FormData) => {
+  const router = useRouter();
+  const [accessType, setAccessType] = useState('purchase');
+  const isPurchase = accessType === 'purchase';
+
+  const [state, formAction] = useActionState<SubmissionResult, FormData>(
+    async (_prev: SubmissionResult, formData: FormData) => {
       return createDesignerSubmission(formData);
     },
     null
   );
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push('/designer?submitted=1');
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className="paper-panel rounded-[1.9rem] border border-[var(--border-light)] p-6">
@@ -59,7 +69,7 @@ export function UploadForm() {
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)]">
           Access model
-          <select name="accessType" className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3">
+          <select name="accessType" value={accessType} onChange={(e) => setAccessType(e.target.value)} className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3">
             <option value="purchase">Purchase-only</option>
             <option value="included">Included</option>
             <option value="free">Free</option>
@@ -67,7 +77,7 @@ export function UploadForm() {
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)]">
           Price (USD)
-          <input name="price" type="number" min="0" defaultValue="7" step="0.5" className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3" />
+          <input name="price" type="number" min="0" defaultValue="7" step="0.5" disabled={!isPurchase} className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50" />
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] md:col-span-2">
           Files

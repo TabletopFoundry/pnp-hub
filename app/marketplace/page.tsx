@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 import { GameCard } from '@/app/components/game-card';
 import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form';
@@ -7,6 +8,11 @@ import { getMarketplaceGames } from '@/lib/data';
 import type { MarketplaceFilters } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Marketplace — PnP Hub',
+  description: 'Browse and filter the full catalog of print-and-play board games.',
+};
 
 type MarketplacePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

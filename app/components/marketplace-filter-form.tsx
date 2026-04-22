@@ -39,6 +39,17 @@ export function MarketplaceFilterForm() {
     ([, value]) => value && value !== 'newest' && value !== ''
   );
 
+  const filterLabels: Record<string, string> = {
+    q: 'Search',
+    category: 'Category',
+    players: 'Players',
+    complexity: 'Complexity',
+    price: 'Price',
+    rating: 'Rating',
+    access: 'Access',
+    sort: 'Sort',
+  };
+
   return (
     <div className={isPending ? 'opacity-70 transition-opacity' : ''}>
       <fieldset className="mt-8 grid gap-4 lg:grid-cols-4">
@@ -165,7 +176,7 @@ export function MarketplaceFilterForm() {
         <div className="mt-5 flex flex-wrap gap-2">
           {activeFilters.map(([key, value]) => (
             <span key={key} className="rounded-full bg-[var(--bg-gold-tint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
-              {key}: {value}
+              {filterLabels[key] ?? key}: {value}
             </span>
           ))}
         </div>

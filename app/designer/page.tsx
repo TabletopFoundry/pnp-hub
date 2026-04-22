@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import { UploadForm } from '@/app/components/upload-form';
 import { AnalyticsChart } from '@/app/components/analytics-chart';
 import { StatePanel } from '@/app/components/state-panel';
@@ -5,6 +7,11 @@ import { getDesignerDashboard } from '@/lib/data';
 import { formatCurrency } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Designer Dashboard — PnP Hub',
+  description: 'Upload games, track analytics, and manage your print-and-play portfolio.',
+};
 
 type DesignerPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

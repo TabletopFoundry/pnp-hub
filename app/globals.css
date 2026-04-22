@@ -6,7 +6,7 @@
   --paper: #fbf6ed;
   --paper-strong: #efe1c4;
   --sand: #d8b98f;
-  --terracotta: #9a5a3e;
+  --terracotta: #8a5035;
   --forest: #365a4c;
   --ink: #3a2b1f;
   --rose: #d68b7c;
@@ -17,7 +17,7 @@
   --text-body: rgba(58, 43, 31, 0.88);
   --text-secondary: rgba(58, 43, 31, 0.84);
   --text-strong: rgba(58, 43, 31, 0.92);
-  --text-muted: rgba(58, 43, 31, 0.72);
+  --text-muted: rgba(58, 43, 31, 0.76);
 
   /* Border colors */
   --border-light: rgba(77, 57, 36, 0.08);

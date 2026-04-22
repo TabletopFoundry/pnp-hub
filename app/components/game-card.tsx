@@ -2,10 +2,10 @@ import Link from 'next/link';
 
 import { GameArt } from '@/app/components/game-art';
 import { accessLabel, complexityLabel, displayPrice, playerLabel } from '@/lib/format';
-import type { GameSummary } from '@/lib/types';
+import type { GameCardView } from '@/lib/types';
 
 type GameCardProps = {
-  game: GameSummary;
+  game: GameCardView;
 };
 
 export function GameCard({ game }: GameCardProps) {

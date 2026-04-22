@@ -1,10 +1,16 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { StatePanel } from '@/app/components/state-panel';
 import { getCraftGallery, getMonthlyCraftGame, getTutorials } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Community — PnP Hub',
+  description: 'Tutorials, craft gallery, and community resources for print-and-play board game enthusiasts.',
+};
 
 export default function CommunityPage() {
   const craftGallery = getCraftGallery();

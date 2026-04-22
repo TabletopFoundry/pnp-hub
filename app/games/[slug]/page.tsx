@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { DownloadButton } from '@/app/components/download-button';
@@ -12,6 +13,16 @@ export const dynamic = 'force-dynamic';
 type GameDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: GameDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const game = getGameBySlug(slug);
+  if (!game) return { title: 'Game Not Found — PnP Hub' };
+  return {
+    title: `${game.title} — PnP Hub`,
+    description: game.tagline,
+  };
+}
 
 export default async function GameDetailPage({ params }: GameDetailPageProps) {
   const { slug } = await params;
