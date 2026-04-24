@@ -9,7 +9,7 @@ import { getFeaturedGames, getMonthlyCraftGame } from '@/lib/data';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'PnP Hub — Print-and-Play Board Game Marketplace',
+  title: 'Home',
   description: 'Discover, buy, and optimize beautifully merchandised print-and-play board games.',
 };
 
@@ -61,7 +61,7 @@ export default function HomePage() {
                 <div key={title} className="flex gap-4 rounded-[1.5rem] bg-white/70 p-4">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--forest)] text-sm font-semibold text-white">0{index + 1}</span>
                   <div>
-                    <h2 className="text-lg font-semibold text-[var(--ink)]">{title}</h2>
+                    <h3 className="text-lg font-semibold text-[var(--ink)]">{title}</h3>
                     <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">{body}</p>
                   </div>
                 </div>

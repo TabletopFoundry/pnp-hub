@@ -9,7 +9,7 @@ import { formatCurrency } from '@/lib/format';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Designer Dashboard — PnP Hub',
+  title: 'Designer Dashboard',
   description: 'Upload games, track analytics, and manage your print-and-play portfolio.',
 };
 

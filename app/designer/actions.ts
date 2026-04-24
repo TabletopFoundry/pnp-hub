@@ -3,15 +3,13 @@
 import { revalidatePath } from 'next/cache';
 
 import { createDraftGame } from '@/lib/db';
+import { ACCESS_TYPES, GAME_CATEGORIES, MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '@/lib/constants';
 import type { AccessType, GameCategory } from '@/lib/types';
 
 export type SubmissionResult = { error?: string; success?: boolean } | null;
 
-const MAX_TITLE = 200;
-const MAX_DESCRIPTION = 5000;
-
-const VALID_CATEGORIES = ['Strategy', 'Party', 'Family', 'Solo', 'Cooperative', 'Card', 'Educational', '2-Player'] as const satisfies readonly GameCategory[];
-const VALID_ACCESS_TYPES: AccessType[] = ['free', 'included', 'purchase'];
+const VALID_CATEGORIES = GAME_CATEGORIES satisfies readonly GameCategory[];
+const VALID_ACCESS_TYPES: readonly AccessType[] = ACCESS_TYPES;
 
 export async function createDesignerSubmission(formData: FormData): Promise<SubmissionResult> {
   const title = String(formData.get('title') ?? '').trim();
@@ -30,11 +28,11 @@ export async function createDesignerSubmission(formData: FormData): Promise<Subm
   }
 
   // Length limits
-  if (title.length > MAX_TITLE) {
-    return { error: `Title must be under ${MAX_TITLE} characters.` };
+  if (title.length > MAX_TITLE_LENGTH) {
+    return { error: `Title must be under ${MAX_TITLE_LENGTH} characters.` };
   }
-  if (description.length > MAX_DESCRIPTION) {
-    return { error: `Description must be under ${MAX_DESCRIPTION} characters.` };
+  if (description.length > MAX_DESCRIPTION_LENGTH) {
+    return { error: `Description must be under ${MAX_DESCRIPTION_LENGTH} characters.` };
   }
 
   // Validate category against known values

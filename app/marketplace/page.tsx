@@ -10,7 +10,7 @@ import type { MarketplaceFilters } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Marketplace — PnP Hub',
+  title: 'Marketplace',
   description: 'Browse and filter the full catalog of print-and-play board games.',
 };
 

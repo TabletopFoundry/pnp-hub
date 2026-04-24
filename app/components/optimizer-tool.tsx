@@ -4,6 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 import { StatePanel } from '@/app/components/state-panel';
+import {
+  A4_PAPER_MULTIPLIER,
+  BASE_SHEET_COST,
+  BW_INK_COST,
+  COLOR_INK_COST,
+  DUPLEX_COST_SAVINGS,
+  DUPLEX_SHEET_SAVINGS,
+  PRINTER_PROFILE_STORAGE_KEY,
+} from '@/lib/constants';
 import { formatCurrency } from '@/lib/format';
 import type { OptimizerGame } from '@/lib/types';
 
@@ -15,7 +24,6 @@ type OptimizerToolProps = {
 
 type PrinterProfile = { paperSize: 'Letter' | 'A4'; colorMode: 'Color' | 'B&W'; duplex: 'Simplex' | 'Duplex' };
 const DEFAULT_PROFILE: PrinterProfile = { paperSize: 'Letter', colorMode: 'Color', duplex: 'Simplex' };
-const STORAGE_KEY = 'pnp-hub-printer-profile';
 
 export function OptimizerTool({ games, initialSlug, compact = false }: OptimizerToolProps) {
   const [selectedSlug, setSelectedSlug] = useState(initialSlug ?? games[0]?.slug ?? '');
@@ -25,7 +33,7 @@ export function OptimizerTool({ games, initialSlug, compact = false }: Optimizer
   // Load localStorage profile after mount to avoid hydration mismatch
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
+      const saved = window.localStorage.getItem(PRINTER_PROFILE_STORAGE_KEY);
       if (saved) {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate from localStorage on mount
         setProfile(JSON.parse(saved) as PrinterProfile);
@@ -38,7 +46,7 @@ export function OptimizerTool({ games, initialSlug, compact = false }: Optimizer
 
   useEffect(() => {
     if (mounted) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      window.localStorage.setItem(PRINTER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
     }
   }, [profile, mounted]);
 
@@ -54,11 +62,11 @@ export function OptimizerTool({ games, initialSlug, compact = false }: Optimizer
     );
   }
 
-  const paperMultiplier = paperSize === 'A4' ? 1.05 : 1;
-  const colorMultiplier = colorMode === 'Color' ? 0.18 : 0.08;
-  const duplexSavings = duplex === 'Duplex' ? 0.86 : 1;
-  const estimatedCost = Math.round(selectedGame.sheetCount * paperMultiplier * (0.16 + colorMultiplier) * duplexSavings * 100);
-  const estimatedSheets = Math.max(1, Math.ceil(selectedGame.sheetCount * (paperSize === 'A4' ? 1.05 : 1) * (duplex === 'Duplex' ? 0.88 : 1)));
+  const paperMultiplier = paperSize === 'A4' ? A4_PAPER_MULTIPLIER : 1;
+  const colorMultiplier = colorMode === 'Color' ? COLOR_INK_COST : BW_INK_COST;
+  const duplexSavings = duplex === 'Duplex' ? DUPLEX_COST_SAVINGS : 1;
+  const estimatedCost = Math.round(selectedGame.sheetCount * paperMultiplier * (BASE_SHEET_COST + colorMultiplier) * duplexSavings * 100);
+  const estimatedSheets = Math.max(1, Math.ceil(selectedGame.sheetCount * (paperSize === 'A4' ? A4_PAPER_MULTIPLIER : 1) * (duplex === 'Duplex' ? DUPLEX_SHEET_SAVINGS : 1)));
 
   return (
     <div className={compact ? 'grid gap-5 lg:grid-cols-[1.1fr_0.9fr]' : 'grid gap-6 xl:grid-cols-[1.1fr_0.9fr]'}>

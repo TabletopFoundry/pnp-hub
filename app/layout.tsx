@@ -6,8 +6,24 @@ import { MobileNav } from '@/app/components/mobile-nav';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'PnP Hub',
-  description: 'A warm, craft-inspired print-and-play marketplace MVP built with Next.js and SQLite.',
+  title: {
+    default: 'PnP Hub — Print-and-Play Board Game Marketplace',
+    template: '%s — PnP Hub',
+  },
+  description: 'Discover, buy, and optimize beautifully merchandised print-and-play board games. A warm, craft-inspired marketplace built with Next.js and SQLite.',
+  keywords: ['print-and-play', 'board games', 'tabletop', 'marketplace', 'print optimizer', 'craft'],
+  authors: [{ name: 'PnP Hub Contributors' }],
+  openGraph: {
+    title: 'PnP Hub — Print-and-Play Board Game Marketplace',
+    description: 'Find a game tonight, print with confidence, and craft something beautiful by dinner.',
+    siteName: 'PnP Hub',
+    type: 'website',
+    locale: 'en_US',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 const navigation = [

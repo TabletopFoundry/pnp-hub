@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/your-username/pnp-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/pnp-hub/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.x-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 
 ---
@@ -57,6 +57,7 @@ app/                      # Next.js App Router
 ├── layout.tsx            # Root layout with nav + footer
 └── page.tsx              # Landing page
 lib/                      # Core business logic
+├── constants.ts          # Shared application constants
 ├── data.ts               # Database query helpers
 ├── db.ts                 # SQLite connection, schema, seeding
 ├── format.ts             # Display formatting utilities

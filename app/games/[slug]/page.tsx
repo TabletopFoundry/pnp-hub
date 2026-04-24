@@ -17,9 +17,9 @@ type GameDetailPageProps = {
 export async function generateMetadata({ params }: GameDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const game = getGameBySlug(slug);
-  if (!game) return { title: 'Game Not Found — PnP Hub' };
+  if (!game) return { title: 'Game Not Found' };
   return {
-    title: `${game.title} — PnP Hub`,
+    title: game.title,
     description: game.tagline,
   };
 }

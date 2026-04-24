@@ -8,7 +8,7 @@ import { getCraftGallery, getMonthlyCraftGame, getTutorials } from '@/lib/data';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Community — PnP Hub',
+  title: 'Community',
   description: 'Tutorials, craft gallery, and community resources for print-and-play board game enthusiasts.',
 };
 
