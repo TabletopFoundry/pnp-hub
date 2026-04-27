@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { GameCard } from '@/app/components/game-card';
 import { MockActionButton } from '@/app/components/mock-action-button';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
+import { GAME_CATEGORIES } from '@/lib/constants';
 import { getFeaturedGames, getMonthlyCraftGame } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   description: 'Discover, buy, and optimize beautifully merchandised print-and-play board games.',
 };
 
-const categories = ['Strategy', 'Party', 'Solo', 'Family', 'Educational', 'Cooperative', '2-Player'];
+const categories = GAME_CATEGORIES;
 
 export default function HomePage() {
   const featuredGames = getFeaturedGames();

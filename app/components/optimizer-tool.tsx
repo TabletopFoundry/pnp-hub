@@ -25,6 +25,16 @@ type OptimizerToolProps = {
 type PrinterProfile = { paperSize: 'Letter' | 'A4'; colorMode: 'Color' | 'B&W'; duplex: 'Simplex' | 'Duplex' };
 const DEFAULT_PROFILE: PrinterProfile = { paperSize: 'Letter', colorMode: 'Color', duplex: 'Simplex' };
 
+function isValidProfile(value: unknown): value is PrinterProfile {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    (v.paperSize === 'Letter' || v.paperSize === 'A4') &&
+    (v.colorMode === 'Color' || v.colorMode === 'B&W') &&
+    (v.duplex === 'Simplex' || v.duplex === 'Duplex')
+  );
+}
+
 export function OptimizerTool({ games, initialSlug, compact = false }: OptimizerToolProps) {
   const [selectedSlug, setSelectedSlug] = useState(initialSlug ?? games[0]?.slug ?? '');
   const [profile, setProfile] = useState<PrinterProfile>(DEFAULT_PROFILE);
@@ -35,8 +45,9 @@ export function OptimizerTool({ games, initialSlug, compact = false }: Optimizer
     try {
       const saved = window.localStorage.getItem(PRINTER_PROFILE_STORAGE_KEY);
       if (saved) {
+        const parsed: unknown = JSON.parse(saved);
         // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate from localStorage on mount
-        setProfile(JSON.parse(saved) as PrinterProfile);
+        if (isValidProfile(parsed)) setProfile(parsed);
       }
     } catch { /* ignore malformed data */ }
     setMounted(true);

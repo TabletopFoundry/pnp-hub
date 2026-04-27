@@ -50,14 +50,18 @@ export async function createDesignerSubmission(formData: FormData): Promise<Subm
     return { error: 'Purchase games must have a price greater than $0.' };
   }
 
-  createDraftGame({
-    title,
-    description,
-    category,
-    accessType,
-    priceCents: Math.round(priceDollars * 100),
-    uploadedFiles: files.length ? files : ['mock-rules.pdf', 'print-sheets.zip'],
-  });
+  try {
+    createDraftGame({
+      title,
+      description,
+      category,
+      accessType,
+      priceCents: Math.round(priceDollars * 100),
+      uploadedFiles: files.length ? files : ['mock-rules.pdf', 'print-sheets.zip'],
+    });
+  } catch {
+    return { error: 'Failed to save your submission. Please try again.' };
+  }
 
   revalidatePath('/designer');
   return { success: true };

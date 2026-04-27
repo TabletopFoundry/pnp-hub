@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { createDesignerSubmission, type SubmissionResult } from '@/app/designer/actions';
 import { UploadSubmitButton } from '@/app/components/upload-submit-button';
+import { GAME_CATEGORIES } from '@/lib/constants';
 
 export function UploadForm() {
   const router = useRouter();
@@ -48,13 +49,9 @@ export function UploadForm() {
         <label className="space-y-2 text-sm font-medium text-[var(--ink)]">
           Category
           <select name="category" className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3">
-            <option>Strategy</option>
-            <option>Party</option>
-            <option>Solo</option>
-            <option>Family</option>
-            <option>Educational</option>
-            <option>Cooperative</option>
-            <option>2-Player</option>
+            {GAME_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
           </select>
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] md:col-span-2">

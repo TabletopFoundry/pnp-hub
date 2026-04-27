@@ -1,14 +1,15 @@
 import { categoryColors } from '@/lib/seed';
+import type { GameCategory } from '@/lib/types';
 
 type GameArtProps = {
   title: string;
   subtitle: string;
-  category: string;
+  category: GameCategory;
   heightClassName?: string;
 };
 
 export function GameArt({ title, subtitle, category, heightClassName = 'h-64' }: GameArtProps) {
-  const accent = categoryColors[category] ?? '#7e6c5c';
+  const accent = categoryColors[category];
 
   return (
     <div

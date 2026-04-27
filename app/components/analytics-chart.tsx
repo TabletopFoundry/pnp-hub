@@ -3,6 +3,7 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Bar, BarChart } from 'recharts';
 
 import type { DashboardMetric, GeographyMetric } from '@/lib/types';
+import { formatCurrency } from '@/lib/format';
 
 type AnalyticsChartProps = {
   metrics: DashboardMetric[];
@@ -32,7 +33,15 @@ export function AnalyticsChart({ metrics, geography }: AnalyticsChartProps) {
               <CartesianGrid stroke="rgba(58,43,31,0.08)" vertical={false} />
               <XAxis dataKey="label" tick={{ fill: '#5f4a35', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#5f4a35', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
-              <Tooltip />
+              <Tooltip
+                formatter={(value, name) => {
+                  const v = Number(value);
+                  const n = String(name);
+                  return n === 'revenue'
+                    ? [formatCurrency(v), 'Revenue']
+                    : [v.toLocaleString(), n.charAt(0).toUpperCase() + n.slice(1)];
+                }}
+              />
               <Area type="monotone" dataKey="downloads" stroke="#365a4c" fill="url(#downloads)" strokeWidth={3} />
             </AreaChart>
           </ResponsiveContainer>
@@ -47,7 +56,15 @@ export function AnalyticsChart({ metrics, geography }: AnalyticsChartProps) {
               <CartesianGrid stroke="rgba(58,43,31,0.08)" horizontal={false} />
               <XAxis type="number" hide />
               <YAxis dataKey="region" type="category" width={96} tick={{ fill: '#5f4a35', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip />
+              <Tooltip
+                formatter={(value, name) => {
+                  const v = Number(value);
+                  const n = String(name);
+                  return n === 'revenue'
+                    ? [formatCurrency(v), 'Revenue']
+                    : [v.toLocaleString(), n.charAt(0).toUpperCase() + n.slice(1)];
+                }}
+              />
               <Bar dataKey="downloads" radius={[0, 999, 999, 0]} fill="#d17c5d" />
             </BarChart>
           </ResponsiveContainer>

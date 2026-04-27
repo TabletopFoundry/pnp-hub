@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useTransition } from 'react';
 import Link from 'next/link';
 
+import { GAME_CATEGORIES } from '@/lib/constants';
+
 export function MarketplaceFilterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -17,6 +19,7 @@ export function MarketplaceFilterForm() {
       } else {
         params.delete(key);
       }
+      if (key !== 'page') params.delete('page');
       startTransition(() => {
         router.push(`/marketplace?${params.toString()}`);
       });
@@ -57,6 +60,7 @@ export function MarketplaceFilterForm() {
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] lg:col-span-2">
           Search
           <input
+            key={searchParams.toString()}
             name="q"
             defaultValue={currentFilters.q}
             placeholder="Search titles or designers"
@@ -75,13 +79,9 @@ export function MarketplaceFilterForm() {
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">All categories</option>
-            <option>Strategy</option>
-            <option>Party</option>
-            <option>Solo</option>
-            <option>Family</option>
-            <option>Educational</option>
-            <option>Cooperative</option>
-            <option>2-Player</option>
+            {GAME_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
           </select>
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)]">

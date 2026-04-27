@@ -6,7 +6,7 @@ import { getOptimizerGames } from '@/lib/data';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Print Optimizer — PnP Hub',
+  title: 'Print Optimizer',
   description: 'Optimize your print-and-play game layouts to save paper and ink.',
 };
 

@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
 import { GameCard } from '@/app/components/game-card';
 import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form';
+import { MarketplacePagination } from '@/app/components/marketplace-pagination';
 import { StatePanel } from '@/app/components/state-panel';
 import { getMarketplaceGames } from '@/lib/data';
 import type { MarketplaceFilters } from '@/lib/types';
@@ -35,7 +37,8 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
     access: asString(resolved.access),
   };
 
-  const result = getMarketplaceGames(filters);
+  const page = Math.max(1, Number(asString(resolved.page)) || 1);
+  const result = getMarketplaceGames(filters, page);
 
   return (
     <div className="section-shell py-12">
@@ -50,16 +53,25 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
           </div>
           <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-sm text-[var(--text-secondary)]">{result.total} titles match right now</div>
         </div>
-        <MarketplaceFilterForm />
+        <Suspense fallback={<FilterSkeleton />}>
+          <MarketplaceFilterForm />
+        </Suspense>
       </div>
 
       <div className="mt-8">
         {result.items.length ? (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {result.items.map((game) => (
-              <GameCard key={game.slug} game={game} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {result.items.map((game) => (
+                <GameCard key={game.slug} game={game} />
+              ))}
+            </div>
+            {result.totalPages > 1 && (
+              <Suspense>
+                <MarketplacePagination currentPage={result.page} totalPages={result.totalPages} />
+              </Suspense>
+            )}
+          </>
         ) : (
           <StatePanel
             eyebrow="Empty results"
@@ -73,6 +85,16 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
           />
         )}
       </div>
+    </div>
+  );
+}
+
+function FilterSkeleton() {
+  return (
+    <div className="mt-8 grid animate-pulse gap-4 lg:grid-cols-4">
+      {Array.from({ length: 8 }, (_, i) => (
+        <div key={i} className="h-[72px] rounded-2xl bg-[var(--border-light)]" />
+      ))}
     </div>
   );
 }
