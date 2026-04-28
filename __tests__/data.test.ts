@@ -244,3 +244,69 @@ describe('createDraftGame', () => {
     expect(draft!.status).toBe('draft');
   });
 });
+
+describe('getMarketplaceGames edge cases', () => {
+  it('clamps excessively large pageSize', () => {
+    const result = getMarketplaceGames({}, 1, 9999);
+    expect(result.pageSize).toBeLessThanOrEqual(100);
+  });
+
+  it('clamps zero or negative pageSize to 1', () => {
+    const result = getMarketplaceGames({}, 1, 0);
+    expect(result.pageSize).toBeGreaterThanOrEqual(1);
+  });
+
+  it('falls back to default sort for invalid sort key', () => {
+    // Should not throw; falls back to newest
+    const result = getMarketplaceGames({ sort: 'invalid_sort_key' });
+    expect(result.items.length).toBeGreaterThan(0);
+  });
+
+  it('handles negative page number gracefully', () => {
+    const result = getMarketplaceGames({}, -5);
+    expect(result.page).toBe(1);
+  });
+
+  it('filters by access type', () => {
+    const result = getMarketplaceGames({ access: 'free' });
+    for (const game of result.items) {
+      expect(game.accessType).toBe('free');
+    }
+  });
+
+  it('filters by complexity', () => {
+    const result = getMarketplaceGames({ complexity: 'light' });
+    for (const game of result.items) {
+      expect(game.complexity).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it('filters by rating', () => {
+    const result = getMarketplaceGames({ rating: '4' });
+    for (const game of result.items) {
+      expect(game.rating).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('filters by price range', () => {
+    const result = getMarketplaceGames({ price: 'free' });
+    for (const game of result.items) {
+      expect(game.accessType).toBe('free');
+    }
+  });
+
+  it('filters by player count', () => {
+    const result = getMarketplaceGames({ players: '2' });
+    for (const game of result.items) {
+      expect(game.playerMin).toBeLessThanOrEqual(2);
+      expect(game.playerMax).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('handles 5+ player filter', () => {
+    const result = getMarketplaceGames({ players: '5+' });
+    for (const game of result.items) {
+      expect(game.playerMax).toBeGreaterThanOrEqual(5);
+    }
+  });
+});

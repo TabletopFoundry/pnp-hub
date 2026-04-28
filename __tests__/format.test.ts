@@ -90,6 +90,12 @@ describe('complexityLabel', () => {
     expect(complexityLabel(4)).toBe('Crunchy');
     expect(complexityLabel(5)).toBe('Crunchy');
   });
+
+  it('handles boundary and extreme values', () => {
+    expect(complexityLabel(0)).toBe('Light');
+    expect(complexityLabel(-1)).toBe('Light');
+    expect(complexityLabel(10)).toBe('Crunchy');
+  });
 });
 
 describe('playerLabel', () => {
@@ -107,5 +113,25 @@ describe('playerLabel', () => {
 
   it('handles wide range', () => {
     expect(playerLabel(1, 6)).toBe('1-6 players');
+  });
+
+  it('handles large player counts', () => {
+    expect(playerLabel(2, 12)).toBe('2-12 players');
+  });
+});
+
+describe('formatCurrency edge cases', () => {
+  it('handles large values', () => {
+    expect(formatCurrency(100000)).toBe('$1,000');
+  });
+
+  it('handles single-digit cents', () => {
+    expect(formatCurrency(101)).toBe('$1.01');
+  });
+
+  it('handles negative values', () => {
+    // Intl.NumberFormat wraps negative values
+    const result = formatCurrency(-500);
+    expect(result).toContain('5');
   });
 });
