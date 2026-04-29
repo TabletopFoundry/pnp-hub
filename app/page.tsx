@@ -40,7 +40,7 @@ export default function HomePage() {
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {[
               ['30+', 'Seeded PnP games'],
-              ['7', 'Curated marketplace categories'],
+              [String(GAME_CATEGORIES.length), 'Curated marketplace categories'],
               ['75/25', 'Designer revenue split'],
             ].map(([value, label]) => (
               <div key={label} className="rounded-[1.5rem] bg-white/70 p-4">

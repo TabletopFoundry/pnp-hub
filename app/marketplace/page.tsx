@@ -7,7 +7,7 @@ import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form'
 import { MarketplacePagination } from '@/app/components/marketplace-pagination';
 import { StatePanel } from '@/app/components/state-panel';
 import { getMarketplaceGames } from '@/lib/data';
-import type { MarketplaceFilters } from '@/lib/types';
+import type { MarketplaceFilters, GameCategory, ComplexityFilter, PriceFilter, SortKey, AccessType } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,13 +28,13 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
   const resolved = await searchParams;
   const filters: MarketplaceFilters = {
     query: asString(resolved.q),
-    category: asString(resolved.category),
+    category: asString(resolved.category) as GameCategory | undefined,
     players: asString(resolved.players),
-    complexity: asString(resolved.complexity),
-    price: asString(resolved.price),
+    complexity: asString(resolved.complexity) as ComplexityFilter | undefined,
+    price: asString(resolved.price) as PriceFilter | undefined,
     rating: asString(resolved.rating),
-    sort: asString(resolved.sort) || 'newest',
-    access: asString(resolved.access),
+    sort: (asString(resolved.sort) || 'newest') as SortKey,
+    access: asString(resolved.access) as AccessType | undefined,
   };
 
   const page = Math.max(1, Number(asString(resolved.page)) || 1);
