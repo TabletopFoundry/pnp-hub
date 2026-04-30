@@ -13,6 +13,7 @@ export function MobileNav({ items }: MobileNavProps) {
   const pathname = usePathname();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
+  const wasOpenRef = useRef(false);
 
   // Close drawer on route change
   const prevPathname = useRef(pathname);
@@ -36,9 +37,11 @@ export function MobileNav({ items }: MobileNavProps) {
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       firstFocusable?.focus();
-    } else {
+    } else if (wasOpenRef.current) {
       triggerRef.current?.focus();
     }
+
+    wasOpenRef.current = open;
   }, [open]);
 
   // Escape key handler
@@ -122,7 +125,7 @@ export function MobileNav({ items }: MobileNavProps) {
                 type="button"
                 onClick={() => setOpen(false)}
                 className="focus-ring flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/70"
-                aria-label="Close navigation menu"
+                aria-label="Close mobile navigation drawer"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <line x1="18" y1="6" x2="6" y2="18" />

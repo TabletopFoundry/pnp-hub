@@ -5,7 +5,7 @@
  * Uses React Testing Library with jsdom environment.
  */
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // --- Mock next/navigation ---
@@ -124,6 +124,24 @@ describe('MobileNav', () => {
   it('renders the hamburger button', () => {
     render(<MobileNav items={navItems} />);
     expect(screen.getByRole('button', { name: /open navigation menu/i })).toBeInTheDocument();
+  });
+
+  it('does not steal focus on initial render', () => {
+    render(<MobileNav items={navItems} />);
+    expect(screen.getByRole('button', { name: /open navigation menu/i })).not.toHaveFocus();
+  });
+
+  it('restores focus to the trigger after closing the drawer', () => {
+    render(<MobileNav items={navItems} />);
+
+    const trigger = screen.getByRole('button', { name: /open navigation menu/i });
+    fireEvent.click(trigger);
+
+    const closeButton = screen.getByRole('button', { name: /close mobile navigation drawer/i });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.click(closeButton);
+    expect(screen.getByRole('button', { name: /open navigation menu/i })).toHaveFocus();
   });
 
   it('does not show nav links when closed', () => {
