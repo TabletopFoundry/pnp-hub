@@ -6,13 +6,17 @@
  */
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const pushMock = vi.fn();
+let mockPathname = '/';
+let mockSearchParams = new URLSearchParams();
 
 // --- Mock next/navigation ---
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
-  usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ push: pushMock, replace: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => mockPathname,
+  useSearchParams: () => mockSearchParams,
 }));
 
 // --- Mock next/link ---
@@ -36,8 +40,15 @@ vi.mock('@/lib/seed', () => ({
 import { DownloadButton } from '@/app/components/download-button';
 import { MockActionButton } from '@/app/components/mock-action-button';
 import { GameCard } from '@/app/components/game-card';
+import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form';
 import { MobileNav } from '@/app/components/mobile-nav';
 import type { GameCardView } from '@/lib/types';
+
+beforeEach(() => {
+  pushMock.mockReset();
+  mockPathname = '/';
+  mockSearchParams = new URLSearchParams();
+});
 
 afterEach(cleanup);
 
@@ -117,6 +128,24 @@ describe('GameCard', () => {
     const links = screen.getAllByRole('link');
     const gameLink = links.find((link) => link.getAttribute('href') === '/games/test-game');
     expect(gameLink).toBeDefined();
+  });
+});
+
+describe('MarketplaceFilterForm', () => {
+  it('preserves a typed search query when another filter changes', () => {
+    render(<MarketplaceFilterForm />);
+
+    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+      target: { value: 'forest fox' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: /category/i }), {
+      target: { value: 'Solo' },
+    });
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock.mock.calls[0][0]).toContain('/marketplace?');
+    expect(pushMock.mock.calls[0][0]).toContain('q=forest+fox');
+    expect(pushMock.mock.calls[0][0]).toContain('category=Solo');
   });
 });
 
