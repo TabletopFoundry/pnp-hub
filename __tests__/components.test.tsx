@@ -36,9 +36,28 @@ vi.mock('@/lib/seed', () => ({
   },
 }));
 
+vi.mock('recharts', () => {
+  const MockContainer = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>;
+  const MockSvgChart = ({ children }: { children?: React.ReactNode }) => <svg>{children}</svg>;
+  const NullChartPrimitive = () => null;
+
+  return {
+    ResponsiveContainer: MockContainer,
+    AreaChart: MockSvgChart,
+    CartesianGrid: NullChartPrimitive,
+    Tooltip: NullChartPrimitive,
+    XAxis: NullChartPrimitive,
+    YAxis: NullChartPrimitive,
+    Area: NullChartPrimitive,
+    BarChart: MockSvgChart,
+    Bar: NullChartPrimitive,
+  };
+});
+
 // --- Imports (after mocks) ---
 import { DownloadButton } from '@/app/components/download-button';
 import { MockActionButton } from '@/app/components/mock-action-button';
+import { AnalyticsChart } from '@/app/components/analytics-chart';
 import { GameCard } from '@/app/components/game-card';
 import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form';
 import { MobileNav } from '@/app/components/mobile-nav';
@@ -146,6 +165,28 @@ describe('MarketplaceFilterForm', () => {
     expect(pushMock.mock.calls[0][0]).toContain('/marketplace?');
     expect(pushMock.mock.calls[0][0]).toContain('q=forest+fox');
     expect(pushMock.mock.calls[0][0]).toContain('category=Solo');
+  });
+});
+
+describe('AnalyticsChart', () => {
+  it('renders accessible summaries and fallback tables for chart data', () => {
+    render(
+      <AnalyticsChart
+        metrics={[
+          { label: 'Day 1', downloads: 100, revenue: 12500 },
+          { label: 'Day 2', downloads: 160, revenue: 18000 },
+        ]}
+        geography={[
+          { region: 'North America', downloads: 140 },
+          { region: 'Europe', downloads: 120 },
+        ]}
+      />
+    );
+
+    expect(screen.getByText(/260 downloads landed over the last 2 days/i)).toBeInTheDocument();
+    expect(screen.getByText(/North America leads with 140 downloads/i)).toBeInTheDocument();
+    expect(screen.getByText('Downloads over time data table')).toBeInTheDocument();
+    expect(screen.getByText('Regional downloads data table')).toBeInTheDocument();
   });
 });
 
