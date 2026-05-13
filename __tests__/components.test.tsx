@@ -108,6 +108,15 @@ describe('DownloadButton', () => {
     render(<DownloadButton label="Get Files" />);
     expect(screen.getByRole('button', { name: 'Get Files' })).not.toBeDisabled();
   });
+
+  it('announces progress through a live region after click', () => {
+    render(<DownloadButton label="Download PDF" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Download PDF' }));
+
+    expect(screen.getAllByText('Downloading PnP files…')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Downloading PnP files…' })).toHaveAttribute('aria-busy', 'true');
+  });
 });
 
 describe('MockActionButton', () => {
@@ -119,6 +128,15 @@ describe('MockActionButton', () => {
   it('is not disabled initially', () => {
     render(<MockActionButton defaultLabel="Save" activeLabel="Saving…" />);
     expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled();
+  });
+
+  it('marks the button busy while the preview action is active', () => {
+    render(<MockActionButton defaultLabel="Save" activeLabel="Saving…" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.getByRole('button', { name: 'Saving…' })).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getAllByText('Saving…')).toHaveLength(2);
   });
 });
 
@@ -194,6 +212,17 @@ describe('MobileNav', () => {
   it('renders the hamburger button', () => {
     render(<MobileNav items={navItems} />);
     expect(screen.getByRole('button', { name: /open navigation menu/i })).toBeInTheDocument();
+  });
+
+  it('associates the trigger with the drawer dialog', () => {
+    render(<MobileNav items={navItems} />);
+
+    const trigger = screen.getByRole('button', { name: /open navigation menu/i });
+    fireEvent.click(trigger);
+
+    const dialog = screen.getByRole('dialog', { name: 'Menu' });
+    expect(trigger).toHaveAttribute('aria-controls', dialog.getAttribute('id'));
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
   });
 
   it('does not steal focus on initial render', () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -11,6 +11,8 @@ type MobileNavProps = {
 export function MobileNav({ items }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const drawerId = useId();
+  const drawerTitleId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const wasOpenRef = useRef(false);
@@ -93,6 +95,8 @@ export function MobileNav({ items }: MobileNavProps) {
         className="focus-ring flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/70"
         aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
         aria-expanded={open}
+        aria-controls={drawerId}
+        aria-haspopup="dialog"
       >
         <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
         {open ? (
@@ -113,14 +117,15 @@ export function MobileNav({ items }: MobileNavProps) {
         <>
           <div className="fixed inset-0 z-30 bg-black/30" onClick={() => setOpen(false)} aria-hidden="true" />
           <nav
+            id={drawerId}
             ref={drawerRef}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={drawerTitleId}
             className="fixed right-0 top-0 z-40 flex h-full w-72 flex-col gap-2 border-l border-[var(--border-light)] bg-[var(--paper)] p-6 shadow-xl"
-            aria-label="Mobile navigation"
           >
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-lg font-semibold text-[var(--ink)]">Menu</span>
+              <span id={drawerTitleId} className="text-lg font-semibold text-[var(--ink)]">Menu</span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}

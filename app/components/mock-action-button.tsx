@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 type MockActionButtonProps = {
   defaultLabel: string;
@@ -10,6 +10,7 @@ type MockActionButtonProps = {
 
 export function MockActionButton({ defaultLabel, activeLabel, className }: MockActionButtonProps) {
   const [active, setActive] = useState(false);
+  const liveRegionId = useId();
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -24,15 +25,23 @@ export function MockActionButton({ defaultLabel, activeLabel, className }: MockA
     timerRef.current = window.setTimeout(() => setActive(false), 1600) as unknown as number;
   };
 
+  const visibleLabel = active ? activeLabel : defaultLabel;
+
   return (
-    <button
-      type="button"
-      disabled={active}
-      onClick={handleClick}
-      aria-live="polite"
-      className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}
-    >
-      {active ? activeLabel : defaultLabel}
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={active}
+        onClick={handleClick}
+        aria-busy={active}
+        aria-describedby={active ? liveRegionId : undefined}
+        className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}
+      >
+        {visibleLabel}
+      </button>
+      <span id={liveRegionId} className="sr-only" aria-live="polite" aria-atomic="true">
+        {active ? activeLabel : ''}
+      </span>
+    </>
   );
 }
