@@ -29,8 +29,14 @@ export function GameCard({ game }: GameCardProps) {
             <span>{playerLabel(game.playerMin, game.playerMax)}</span>
             <span>{game.playTime}</span>
             <span>{complexityLabel(game.complexity)}</span>
-            <span aria-label={`Rating: ${game.rating.toFixed(1)} out of 5 with ${game.ratingCount} ratings`}>
-              <span aria-hidden="true">★</span> {game.rating.toFixed(1)} <span className="text-xs">({game.ratingCount})</span>
+            <span aria-label={game.ratingCount > 0 ? `Rating: ${game.rating.toFixed(1)} out of 5 with ${game.ratingCount} ratings` : 'No ratings yet'}>
+              {game.ratingCount > 0 ? (
+                <>
+                  <span aria-hidden="true">★</span> {game.rating.toFixed(1)} <span className="text-xs">({game.ratingCount})</span>
+                </>
+              ) : (
+                'New'
+              )}
             </span>
           </div>
         </div>

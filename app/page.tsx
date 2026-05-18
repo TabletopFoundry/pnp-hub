@@ -5,7 +5,7 @@ import { GameCard } from '@/app/components/game-card';
 import { MockActionButton } from '@/app/components/mock-action-button';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { GAME_CATEGORIES } from '@/lib/constants';
-import { getFeaturedGames, getMonthlyCraftGame } from '@/lib/data';
+import { getFeaturedGames, getMarketplaceGames, getMonthlyCraftGame } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +19,7 @@ const categories = GAME_CATEGORIES;
 export default function HomePage() {
   const featuredGames = getFeaturedGames();
   const craftAlong = getMonthlyCraftGame();
+  const catalogTotal = getMarketplaceGames({}, 1, 1).total;
 
   return (
     <div className="pb-20">
@@ -39,7 +40,7 @@ export default function HomePage() {
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {[
-              ['30+', 'Seeded PnP games'],
+              [catalogTotal.toLocaleString(), 'Seeded PnP games'],
               [String(GAME_CATEGORIES.length), 'Curated marketplace categories'],
               ['75/25', 'Designer revenue split'],
             ].map(([value, label]) => (

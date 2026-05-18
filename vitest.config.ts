@@ -8,6 +8,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./__tests__/setup.ts'],
     include: ['__tests__/**/*.test.{ts,tsx}'],
+    pool: 'threads',
+    isolate: false,
+    fileParallelism: false,
+    maxWorkers: 1,
     coverage: {
       provider: 'v8',
       include: ['lib/**/*.ts', 'app/**/*.{ts,tsx}'],

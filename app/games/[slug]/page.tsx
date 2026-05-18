@@ -127,21 +127,35 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Ratings & reviews</p>
                 <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">What players are saying</h2>
               </div>
-              <div className="rounded-[1.5rem] bg-[var(--bg-gold-tint)] px-4 py-3 text-sm text-[var(--text-body)]" aria-label={`${game.rating.toFixed(1)} average rating from ${game.ratingCount} ratings`}><span aria-hidden="true">★</span> {game.rating.toFixed(1)} average · {game.ratingCount} ratings</div>
+              <div className="rounded-[1.5rem] bg-[var(--bg-gold-tint)] px-4 py-3 text-sm text-[var(--text-body)]" aria-label={game.ratingCount > 0 ? `${game.rating.toFixed(1)} average rating from ${game.ratingCount} ratings` : 'No ratings yet'}>
+                {game.ratingCount > 0 ? (
+                  <>
+                    <span aria-hidden="true">★</span> {game.rating.toFixed(1)} average · {game.ratingCount} ratings
+                  </>
+                ) : (
+                  'No ratings yet'
+                )}
+              </div>
             </div>
             <div className="mt-5 space-y-4">
-              {reviews.map((review) => (
-                <article key={review.id} className="rounded-[1.5rem] bg-white/80 p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-[var(--ink)]">{review.title}</h3>
-                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--terracotta)]">{review.author} · verified downloader</p>
+              {reviews.length ? (
+                reviews.map((review) => (
+                  <article key={review.id} className="rounded-[1.5rem] bg-white/80 p-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-[var(--ink)]">{review.title}</h3>
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--terracotta)]">{review.author} · verified downloader</p>
+                      </div>
+                      <p className="text-sm font-semibold text-[var(--forest)]" aria-label={`Rating: ${review.rating} out of 5`}><span aria-hidden="true">★</span> {review.rating}</p>
                     </div>
-                    <p className="text-sm font-semibold text-[var(--forest)]" aria-label={`Rating: ${review.rating} out of 5`}><span aria-hidden="true">★</span> {review.rating}</p>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-[var(--text-body)]">{review.body}</p>
-                </article>
-              ))}
+                    <p className="mt-3 text-sm leading-6 text-[var(--text-body)]">{review.body}</p>
+                  </article>
+                ))
+              ) : (
+                <div className="rounded-[1.5rem] bg-white/80 p-5 text-sm leading-6 text-[var(--text-body)]">
+                  This title is brand new in the catalog, so your table could be the first to leave a review.
+                </div>
+              )}
             </div>
           </div>
         </div>

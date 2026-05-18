@@ -13,7 +13,7 @@
 
 | Surface | What it does |
 |---------|-------------|
-| **Marketplace** | Browse 30+ seeded games with search, filters, sorting, badges, and responsive cards |
+| **Marketplace** | Browse 50+ seeded games with search, filters, sorting, badges, and responsive cards |
 | **Game Details** | Preview art, read reviews, view component lists, and check print profiles |
 | **Print Optimizer** | Choose paper size, color mode, preview layouts, estimate costs, and get cutting guidance |
 | **Designer Dashboard** | Upload games, track downloads/revenue, view geography analytics (75/25 split) |
@@ -31,7 +31,7 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:3000** — the SQLite database auto-seeds with 30+ games on first run.
+Open **http://localhost:3000** — the SQLite database auto-seeds with 50+ games on first run.
 
 ## 🏗️ Tech Stack
 
@@ -81,10 +81,13 @@ __tests__/                # Test files
 | `npm run test:coverage` | Run tests with coverage report |
 | `npm run validate` | Run lint + typecheck + tests |
 
-## 💾 Data Model
+## 💾 Seed Data
 
-- The SQLite database lives at `data/pnp-hub.db` and auto-seeds on first run
-- Seed data includes marketplace titles, reviews, tutorials, craft gallery entries, and designer analytics
+- The SQLite database lives at `data/pnp-hub.db` and auto-seeds on first run in development/test environments
+- Auto-seeding is **guarded in production**; set `PNP_HUB_ALLOW_PRODUCTION_SEED=true` only when you intentionally want to load demo data
+- Seeding is **transactional** and **idempotent**: rerunning it updates the seeded catalog without duplicating rows, while draft uploads remain untouched
+- The dataset includes 56 published games, 12 designer profiles, 100+ reviews, 24 craft gallery entries, 18 tutorials, a 12-month craft-along schedule, and richer download/revenue analytics
+- Edge cases are intentionally present: titles with zero ratings, designers with a single game, and long-form descriptions for layout stress testing
 - Designer uploads create draft game records in SQLite, persisting across refreshes
 - Database uses WAL journal mode for better concurrent read performance
 

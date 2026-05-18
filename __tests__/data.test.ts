@@ -6,8 +6,10 @@ import {
   MAX_RELATED_GAMES,
 } from '@/lib/constants';
 import {
+  getCraftAlongSchedule,
   getCraftGallery,
   getDesignerDashboard,
+  getDesignerProfiles,
   getFeaturedGames,
   getGameBySlug,
   getGameOptions,
@@ -145,7 +147,7 @@ describe('getReviewsForGame', () => {
 describe('getTutorials', () => {
   it('returns seeded tutorials', () => {
     const tutorials = getTutorials();
-    expect(tutorials.length).toBeGreaterThan(0);
+    expect(tutorials.length).toBeGreaterThanOrEqual(15);
     expect(tutorials[0]).toHaveProperty('title');
     expect(tutorials[0]).toHaveProperty('difficulty');
     expect(tutorials[0]).toHaveProperty('technique');
@@ -155,9 +157,26 @@ describe('getTutorials', () => {
 describe('getCraftGallery', () => {
   it('returns seeded craft gallery items', () => {
     const gallery = getCraftGallery();
-    expect(gallery.length).toBeGreaterThan(0);
+    expect(gallery.length).toBeGreaterThanOrEqual(20);
     expect(gallery[0]).toHaveProperty('title');
     expect(gallery[0]).toHaveProperty('maker');
+  });
+});
+
+describe('designer and craft-along data', () => {
+  it('returns 10+ designer profiles with varied game counts and revenue', () => {
+    const profiles = getDesignerProfiles();
+    expect(profiles.length).toBeGreaterThanOrEqual(10);
+    expect(profiles.some((profile) => profile.gameCount === 1)).toBe(true);
+    expect(new Set(profiles.map((profile) => profile.gameCount)).size).toBeGreaterThan(1);
+    expect(new Set(profiles.map((profile) => profile.totalRevenueCents)).size).toBeGreaterThan(1);
+  });
+
+  it('returns a full monthly craft-along schedule', () => {
+    const schedule = getCraftAlongSchedule();
+    expect(schedule.length).toBeGreaterThanOrEqual(12);
+    expect(schedule.filter((entry) => entry.isCurrent)).toHaveLength(1);
+    expect(schedule[0]).toHaveProperty('gameTitle');
   });
 });
 
@@ -183,6 +202,11 @@ describe('getGameOptions', () => {
     for (let i = 1; i < options.length; i++) {
       expect(options[i]!.title.localeCompare(options[i - 1]!.title)).toBeGreaterThanOrEqual(0);
     }
+  });
+
+  it('includes the expanded rich catalog', () => {
+    const options = getGameOptions();
+    expect(options.length).toBeGreaterThanOrEqual(50);
   });
 });
 
@@ -258,7 +282,7 @@ describe('getMarketplaceGames edge cases', () => {
 
   it('falls back to default sort for invalid sort key', () => {
     // Should not throw; falls back to newest
-    const result = getMarketplaceGames({ sort: 'invalid_sort_key' });
+    const result = getMarketplaceGames({ sort: 'invalid_sort_key' as never });
     expect(result.items.length).toBeGreaterThan(0);
   });
 
@@ -272,6 +296,11 @@ describe('getMarketplaceGames edge cases', () => {
     for (const game of result.items) {
       expect(game.accessType).toBe('free');
     }
+  });
+
+  it('includes titles with no ratings yet for seed edge cases', () => {
+    const result = getMarketplaceGames({}, 1, 100);
+    expect(result.items.some((game) => game.ratingCount === 0)).toBe(true);
   });
 
   it('filters by complexity', () => {

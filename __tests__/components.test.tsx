@@ -180,9 +180,11 @@ describe('MarketplaceFilterForm', () => {
     });
 
     expect(pushMock).toHaveBeenCalledTimes(1);
-    expect(pushMock.mock.calls[0][0]).toContain('/marketplace?');
-    expect(pushMock.mock.calls[0][0]).toContain('q=forest+fox');
-    expect(pushMock.mock.calls[0][0]).toContain('category=Solo');
+    const firstPush = pushMock.mock.calls[0]?.[0];
+    expect(firstPush).toBeDefined();
+    expect(firstPush).toContain('/marketplace?');
+    expect(firstPush).toContain('q=forest+fox');
+    expect(firstPush).toContain('category=Solo');
   });
 });
 
