@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 import { GameCard } from '@/app/components/game-card';
-import { MockActionButton } from '@/app/components/mock-action-button';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { GAME_CATEGORIES } from '@/lib/constants';
 import { getFeaturedGames, getMarketplaceGames, getMonthlyCraftGame } from '@/lib/data';
@@ -151,11 +150,9 @@ export default function HomePage() {
               <Link href="/designer" className="focus-ring rounded-full bg-[var(--forest)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90">
                 Open designer dashboard
               </Link>
-              <MockActionButton
-                defaultLabel="Preview creator onboarding"
-                activeLabel="Designer preview launched"
-                className="focus-ring rounded-full border border-[var(--border-medium)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70"
-              />
+              <Link href="/community#designer-spotlights" className="focus-ring rounded-full border border-[var(--border-medium)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70">
+                See creator spotlights
+              </Link>
             </div>
           </div>
         </div>

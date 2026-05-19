@@ -1,4 +1,4 @@
-import { MockActionButton } from '@/app/components/mock-action-button';
+import Link from 'next/link';
 
 const tiers = [
   {
@@ -7,6 +7,9 @@ const tiers = [
     badge: 'Start here',
     description: 'Browse the marketplace, claim up to two free titles monthly, and access beginner tutorials.',
     features: ['2 free title claims / month', 'Community craft gallery', 'Basic print notes'],
+    ctaLabel: 'Browse free titles',
+    ctaHref: '/marketplace?access=free',
+    ctaNote: 'Opens the free-catalog demo surface; checkout is not required.',
   },
   {
     name: 'Maker',
@@ -14,6 +17,9 @@ const tiers = [
     badge: 'Most popular',
     description: 'Unlock included titles, subscriber tutorials, and fast optimizer presets for weeknight crafting.',
     features: ['Included catalog access', 'Subscriber tutorials', 'Saved printer profiles'],
+    ctaLabel: 'See included catalog',
+    ctaHref: '/marketplace?access=included',
+    ctaNote: 'Opens the titles currently framed as part of the Maker experience.',
   },
   {
     name: 'Maker+',
@@ -21,6 +27,9 @@ const tiers = [
     badge: 'Studio tier',
     description: 'For power users who print often and want premium optimizer guidance and release alerts.',
     features: ['Everything in Maker', 'Priority optimizer queue', 'Version update notices'],
+    ctaLabel: 'Open premium print workflow',
+    ctaHref: '/optimizer',
+    ctaNote: 'Takes you to the live optimizer demo while billing remains out of scope.',
   },
 ];
 
@@ -45,11 +54,13 @@ export function SubscriptionGrid() {
               </li>
             ))}
           </ul>
-          <MockActionButton
-            defaultLabel={`Choose ${tier.name}`}
-            activeLabel={`${tier.name} preview started`}
+          <Link
+            href={tier.ctaHref}
             className="focus-ring mt-6 inline-flex items-center justify-center rounded-full bg-[var(--forest)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          />
+          >
+            {tier.ctaLabel}
+          </Link>
+          <p className="mt-3 text-xs leading-5 text-[var(--text-secondary)]">{tier.ctaNote}</p>
         </article>
       ))}
     </div>
