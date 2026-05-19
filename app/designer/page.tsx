@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 
-import { UploadForm } from '@/app/components/upload-form';
 import { AnalyticsChart } from '@/app/components/analytics-chart';
+import { DesignerFlash } from '@/app/components/designer-flash';
 import { StatePanel } from '@/app/components/state-panel';
+import { UploadForm } from '@/app/components/upload-form';
 import { getDesignerDashboard } from '@/lib/data';
 import { formatCurrency } from '@/lib/format';
 
@@ -21,7 +22,6 @@ export default async function DesignerPage({ searchParams }: DesignerPageProps) 
   const dashboard = getDesignerDashboard();
   const resolved = await searchParams;
   const submitted = typeof resolved.submitted === 'string';
-  const errorMessage = typeof resolved.error === 'string' ? resolved.error : '';
 
   return (
     <div className="section-shell py-12">
@@ -51,16 +51,7 @@ export default async function DesignerPage({ searchParams }: DesignerPageProps) 
         </div>
       </div>
 
-      {submitted ? (
-        <div className="mt-6 rounded-[1.6rem] border border-[var(--bg-forest-strong)] bg-[var(--bg-forest-subtle)] px-5 py-4 text-sm text-[var(--ink)]">
-          Draft saved to SQLite. Refresh the page or scroll to “My games” to see the new submission.
-        </div>
-      ) : null}
-      {errorMessage ? (
-        <div className="mt-6 rounded-[1.6rem] border border-[var(--bg-terracotta-strong)] bg-[var(--bg-terracotta-subtle)] px-5 py-4 text-sm text-[var(--ink)]">
-          {errorMessage}
-        </div>
-      ) : null}
+      <DesignerFlash submitted={submitted} />
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <UploadForm />

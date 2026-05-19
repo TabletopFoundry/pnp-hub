@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { createDesignerSubmission, type SubmissionResult } from '@/app/designer/actions';
@@ -11,6 +10,8 @@ import { GAME_CATEGORIES } from '@/lib/constants';
 export function UploadForm() {
   const router = useRouter();
   const [accessType, setAccessType] = useState('purchase');
+  const [price, setPrice] = useState('7');
+  const priceHintId = useId();
   const isPurchase = accessType === 'purchase';
 
   const [state, formAction] = useActionState<SubmissionResult, FormData>(
@@ -74,7 +75,23 @@ export function UploadForm() {
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)]">
           Price (USD)
-          <input name="price" type="number" min="0" defaultValue="7" step="0.5" disabled={!isPurchase} className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50" />
+          <input
+            name="price"
+            type="number"
+            min="0"
+            step="0.5"
+            value={isPurchase ? price : ''}
+            placeholder={isPurchase ? '7' : '0'}
+            onChange={(event) => setPrice(event.target.value)}
+            disabled={!isPurchase}
+            aria-describedby={priceHintId}
+            className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <span id={priceHintId} className="block text-xs leading-5 text-[var(--text-secondary)]">
+            {isPurchase
+              ? 'Purchase titles are saved with the price shown here.'
+              : `This ${accessType === 'free' ? 'free' : 'included'} title is saved at $0 in the current MVP.`}
+          </span>
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] md:col-span-2">
           Files
