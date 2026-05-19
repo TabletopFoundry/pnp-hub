@@ -39,6 +39,8 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
 
   const page = Math.max(1, Number(asString(resolved.page)) || 1);
   const result = getMarketplaceGames(filters, page);
+  const rangeStart = result.total === 0 ? 0 : (result.page - 1) * result.pageSize + 1;
+  const rangeEnd = result.total === 0 ? 0 : rangeStart + result.items.length - 1;
 
   return (
     <div className="section-shell py-12">
@@ -53,14 +55,20 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
           </div>
           <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-sm text-[var(--text-secondary)]">{result.total} titles match right now</div>
         </div>
+        <p id="marketplace-results-summary" className="mt-4 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]" aria-live="polite">
+          {result.total > 0
+            ? `Showing ${rangeStart}-${rangeEnd} of ${result.total} titles${filters.query ? ` for “${filters.query}”` : ''}.`
+            : 'No titles currently match these filters.'}
+        </p>
         <Suspense fallback={<FilterSkeleton />}>
           <MarketplaceFilterForm />
         </Suspense>
       </div>
 
-      <div className="mt-8">
+      <section className="mt-8" aria-live="polite" aria-describedby="marketplace-results-summary">
         {result.items.length ? (
           <>
+            <h2 className="sr-only">Marketplace results</h2>
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {result.items.map((game) => (
                 <GameCard key={game.slug} game={game} />
@@ -84,7 +92,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
             }
           />
         )}
-      </div>
+      </section>
     </div>
   );
 }

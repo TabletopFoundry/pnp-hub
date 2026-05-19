@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useTransition } from 'react';
 
 import { GAME_CATEGORIES } from '@/lib/constants';
 
@@ -11,33 +11,64 @@ function buildMarketplaceHref(params: URLSearchParams) {
   return query ? `/marketplace?${query}` : '/marketplace';
 }
 
+type FilterKey = 'q' | 'category' | 'players' | 'complexity' | 'price' | 'rating' | 'access' | 'sort' | 'page';
+
+type CurrentFilters = {
+  q: string;
+  category: string;
+  players: string;
+  complexity: string;
+  price: string;
+  rating: string;
+  access: string;
+  sort: string;
+};
+
 export function MarketplaceFilterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const searchParamsKey = searchParams.toString();
+  const queryInputRef = useRef<HTMLInputElement>(null);
+  const queryDebounceRef = useRef<number | null>(null);
 
-  const currentFilters = useMemo(() => ({
-    q: searchParams.get('q') ?? '',
-    category: searchParams.get('category') ?? '',
-    players: searchParams.get('players') ?? '',
-    complexity: searchParams.get('complexity') ?? '',
-    price: searchParams.get('price') ?? '',
-    rating: searchParams.get('rating') ?? '',
-    access: searchParams.get('access') ?? '',
-    sort: searchParams.get('sort') ?? 'newest',
-  }), [searchParams]);
+  const currentFilters = useMemo<CurrentFilters>(() => {
+    const params = new URLSearchParams(searchParamsKey);
+    return {
+      q: params.get('q') ?? '',
+      category: params.get('category') ?? '',
+      players: params.get('players') ?? '',
+      complexity: params.get('complexity') ?? '',
+      price: params.get('price') ?? '',
+      rating: params.get('rating') ?? '',
+      access: params.get('access') ?? '',
+      sort: params.get('sort') ?? 'newest',
+    };
+  }, [searchParamsKey]);
 
-  const [draftQuery, setDraftQuery] = useState(currentFilters.q);
+  const clearPendingQuery = useCallback(() => {
+    if (queryDebounceRef.current !== null) {
+      window.clearTimeout(queryDebounceRef.current);
+      queryDebounceRef.current = null;
+    }
+  }, []);
 
-  useEffect(() => {
-    setDraftQuery(currentFilters.q);
-  }, [currentFilters.q, searchParamsKey]);
+  useEffect(() => () => clearPendingQuery(), [clearPendingQuery]);
+
+  const pushParams = useCallback((params: URLSearchParams) => {
+    startTransition(() => {
+      router.push(buildMarketplaceHref(params));
+    });
+  }, [router, startTransition]);
 
   const updateFilter = useCallback(
-    (key: string, value: string, options?: { preserveDraftQuery?: boolean }) => {
+    (key: FilterKey, value: string, options?: { preserveDraftQuery?: boolean }) => {
+      if (key !== 'q') {
+        clearPendingQuery();
+      }
+
       const params = new URLSearchParams(searchParamsKey);
-      const nextQuery = options?.preserveDraftQuery ? draftQuery.trim() : undefined;
+      const nextQuery = options?.preserveDraftQuery ? queryInputRef.current?.value.trim() ?? currentFilters.q : undefined;
 
       if (nextQuery !== undefined && key !== 'q') {
         if (nextQuery) {
@@ -52,19 +83,28 @@ export function MarketplaceFilterForm() {
       } else {
         params.delete(key);
       }
-      if (key !== 'page') params.delete('page');
-      startTransition(() => {
-        router.push(buildMarketplaceHref(params));
-      });
+
+      if (key !== 'page') {
+        params.delete('page');
+      }
+
+      pushParams(params);
     },
-    [draftQuery, router, searchParamsKey, startTransition]
+    [clearPendingQuery, currentFilters.q, pushParams, searchParamsKey]
   );
+
+  const scheduleQueryUpdate = useCallback((value: string) => {
+    clearPendingQuery();
+    queryDebounceRef.current = window.setTimeout(() => {
+      updateFilter('q', value.trim());
+    }, 350) as unknown as number;
+  }, [clearPendingQuery, updateFilter]);
 
   const activeFilters = Object.entries(currentFilters).filter(
-    ([, value]) => value && value !== 'newest' && value !== ''
-  );
+    ([key, value]) => value && !(key === 'sort' && value === 'newest')
+  ) as Array<[keyof CurrentFilters, string]>;
 
-  const filterLabels: Record<string, string> = {
+  const filterLabels: Record<keyof CurrentFilters, string> = {
     q: 'Search',
     category: 'Category',
     players: 'Players',
@@ -75,32 +115,46 @@ export function MarketplaceFilterForm() {
     sort: 'Sort',
   };
 
+  const statusMessage = isPending
+    ? 'Updating marketplace results…'
+    : activeFilters.length
+      ? `${activeFilters.length} filter${activeFilters.length === 1 ? '' : 's'} applied.`
+      : 'Showing all marketplace titles.';
+
   return (
     <form
+      aria-busy={isPending}
       className={isPending ? 'opacity-70 transition-opacity' : ''}
       onSubmit={(event) => {
         event.preventDefault();
-        updateFilter('q', draftQuery.trim());
+        clearPendingQuery();
+        updateFilter('q', queryInputRef.current?.value.trim() ?? '');
       }}
     >
-      <fieldset className="mt-8 grid gap-4 lg:grid-cols-4">
+      <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]" role="status" aria-live="polite">
+        {statusMessage}
+      </p>
+      <fieldset className="mt-4 grid gap-4 lg:grid-cols-4">
         <legend className="sr-only">Marketplace filters</legend>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] lg:col-span-2">
           Search
           <div className="flex gap-3">
             <input
+              key={searchParamsKey}
+              ref={queryInputRef}
               name="q"
-              value={draftQuery}
+              type="search"
+              defaultValue={currentFilters.q}
               placeholder="Search titles or designers"
-              onChange={(event) => setDraftQuery(event.target.value)}
-              onBlur={() => updateFilter('q', draftQuery.trim())}
+              autoComplete="off"
+              onChange={(event) => scheduleQueryUpdate(event.target.value)}
               className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
             />
             <button
               type="submit"
               className="focus-ring inline-flex shrink-0 items-center justify-center rounded-full border border-[var(--border-medium)] px-5 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70"
             >
-              Apply
+              Search
             </button>
           </div>
         </label>
@@ -108,7 +162,7 @@ export function MarketplaceFilterForm() {
           Category
           <select
             value={currentFilters.category}
-            onChange={(e) => updateFilter('category', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('category', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">All categories</option>
@@ -121,7 +175,7 @@ export function MarketplaceFilterForm() {
           Players
           <select
             value={currentFilters.players}
-            onChange={(e) => updateFilter('players', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('players', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">Any table size</option>
@@ -135,7 +189,7 @@ export function MarketplaceFilterForm() {
           Complexity
           <select
             value={currentFilters.complexity}
-            onChange={(e) => updateFilter('complexity', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('complexity', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">Any weight</option>
@@ -148,7 +202,7 @@ export function MarketplaceFilterForm() {
           Price
           <select
             value={currentFilters.price}
-            onChange={(e) => updateFilter('price', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('price', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">Any price</option>
@@ -162,7 +216,7 @@ export function MarketplaceFilterForm() {
           Rating
           <select
             value={currentFilters.rating}
-            onChange={(e) => updateFilter('rating', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('rating', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">Any rating</option>
@@ -174,7 +228,7 @@ export function MarketplaceFilterForm() {
           Access
           <select
             value={currentFilters.access}
-            onChange={(e) => updateFilter('access', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('access', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="">All access types</option>
@@ -187,7 +241,7 @@ export function MarketplaceFilterForm() {
           Sort by
           <select
             value={currentFilters.sort}
-            onChange={(e) => updateFilter('sort', e.target.value, { preserveDraftQuery: true })}
+            onChange={(event) => updateFilter('sort', event.target.value, { preserveDraftQuery: true })}
             className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
           >
             <option value="newest">Newest</option>
@@ -201,16 +255,22 @@ export function MarketplaceFilterForm() {
             href="/marketplace"
             className="focus-ring inline-flex h-[50px] items-center justify-center rounded-full border border-[var(--border-medium)] px-5 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70"
           >
-            Reset
+            Clear all filters
           </Link>
         </div>
       </fieldset>
       {activeFilters.length ? (
         <div className="mt-5 flex flex-wrap gap-2">
           {activeFilters.map(([key, value]) => (
-            <span key={key} className="rounded-full bg-[var(--bg-gold-tint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
-              {filterLabels[key] ?? key}: {value}
-            </span>
+            <button
+              key={key}
+              type="button"
+              onClick={() => updateFilter(key, '', { preserveDraftQuery: key !== 'q' })}
+              className="focus-ring rounded-full bg-[var(--bg-gold-tint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:bg-[var(--bg-gold-medium)]"
+              aria-label={`Remove ${filterLabels[key]} filter: ${value}`}
+            >
+              {filterLabels[key]}: {value} ×
+            </button>
           ))}
         </div>
       ) : null}
