@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-import { SubscriptionGrid } from '@/app/components/subscription-grid';
+import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
+import { DesignerSpotlights } from '@/app/components/designer-spotlights';
 import { StatePanel } from '@/app/components/state-panel';
-import { getCraftGallery, getMonthlyCraftGame, getTutorials } from '@/lib/data';
+import { SubscriptionGrid } from '@/app/components/subscription-grid';
+import { getCraftAlongSchedule, getCraftGallery, getDesignerProfiles, getMonthlyCraftGame, getTutorials } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +18,8 @@ export default function CommunityPage() {
   const craftGallery = getCraftGallery();
   const tutorials = getTutorials();
   const craftAlong = getMonthlyCraftGame();
+  const craftSchedule = getCraftAlongSchedule();
+  const featuredDesigners = getDesignerProfiles().slice(0, 3);
 
   return (
     <div className="section-shell py-12">
@@ -93,7 +97,12 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      <section className="mt-10">
+      <section className="mt-10 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <CraftAlongCalendar schedule={craftSchedule} />
+        <DesignerSpotlights designers={featuredDesigners} />
+      </section>
+
+      <section className="mt-10" id="subscription-comparison">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--terracotta)]">Subscription comparison</p>
         <h2 className="section-title mt-3 font-semibold text-[var(--ink)]">Choose the support tier that matches your craft table</h2>
         <div className="mt-7">
