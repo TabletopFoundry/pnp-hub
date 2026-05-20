@@ -120,6 +120,41 @@ export function MarketplaceFilterForm() {
     sort: 'Sort',
   };
 
+  const filterValueLabels: Partial<Record<keyof CurrentFilters, Record<string, string>>> = {
+    players: {
+      '1': 'Solo',
+      '2': '2 players',
+      '4': '4 players',
+      '5+': '5+ players',
+    },
+    complexity: {
+      light: 'Light',
+      medium: 'Medium',
+      heavy: 'Crunchy',
+    },
+    price: {
+      free: 'Free',
+      paid: 'Paid only',
+      under5: '$5 or less',
+      under10: '$10 or less',
+    },
+    rating: {
+      '4': '4.0+',
+      '4.5': '4.5+',
+    },
+    access: {
+      free: 'Free',
+      included: 'Included',
+      purchase: 'Purchase-only',
+    },
+    sort: {
+      newest: 'Newest',
+      popular: 'Most popular',
+      rated: 'Highest rated',
+      price: 'Price',
+    },
+  };
+
   const statusMessage = isPending
     ? 'Updating marketplace results…'
     : activeFilters.length
@@ -267,17 +302,21 @@ export function MarketplaceFilterForm() {
       </fieldset>
       {activeFilters.length ? (
         <div className="mt-5 flex flex-wrap gap-2">
-          {activeFilters.map(([key, value]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => updateFilter(key, '', { preserveDraftQuery: key !== 'q' })}
-              className="focus-ring rounded-full bg-[var(--bg-gold-tint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:bg-[var(--bg-gold-medium)]"
-              aria-label={`Remove ${filterLabels[key]} filter: ${value}`}
-            >
-              {filterLabels[key]}: {value} ×
-            </button>
-          ))}
+          {activeFilters.map(([key, value]) => {
+            const displayValue = filterValueLabels[key]?.[value] ?? value;
+
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => updateFilter(key, '', { preserveDraftQuery: key !== 'q' })}
+                className="focus-ring rounded-full bg-[var(--bg-gold-tint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:bg-[var(--bg-gold-medium)]"
+                aria-label={`Remove ${filterLabels[key]} filter: ${displayValue}`}
+              >
+                {filterLabels[key]}: {displayValue} ×
+              </button>
+            );
+          })}
         </div>
       ) : null}
     </form>

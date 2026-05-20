@@ -117,7 +117,7 @@ The primary browse, detail, and designer journeys remain strong, but five fresh 
 | Remediation | Status | Implementation |
 |---|---|---|
 | Convert marketplace search to a controlled field | Implemented | `app/components/marketplace-filter-form.tsx` now keeps the query in local state synced from URL params, and `__tests__/components.test.tsx` covers focus/value retention after the debounced push. |
-| Translate active-filter chips to product-language labels | Planned | Pending implementation in `app/components/marketplace-filter-form.tsx` and `__tests__/components.test.tsx`. |
+| Translate active-filter chips to product-language labels | Implemented | `app/components/marketplace-filter-form.tsx` now maps raw filter values to the same user-facing labels shown in the controls, and `__tests__/components.test.tsx` covers the rendered chip copy and `aria-label`s. |
 | Consolidate marketplace result announcements into one polite region | Planned | Pending implementation in `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, and `__tests__/components.test.tsx`. |
 | Respect the `review.verified` field in review bylines | Planned | Pending implementation in `app/games/[slug]/page.tsx`, `lib/format.ts`, and `__tests__/format.test.ts`. |
 | Replace stale seeded-title count copy in the shell banner | Planned | Pending implementation in `app/layout.tsx`, `lib/constants.ts`, and `__tests__/constants.test.ts`. |

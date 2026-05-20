@@ -376,6 +376,17 @@ describe('MarketplaceFilterForm', () => {
     expect(updatedInput).toHaveFocus();
   });
 
+  it('renders active filter chips with user-facing labels', () => {
+    mockSearchParams = new URLSearchParams('complexity=heavy&price=under5&sort=popular&rating=4.5&access=purchase');
+    render(<MarketplaceFilterForm />);
+
+    expect(screen.getByRole('button', { name: /remove complexity filter: crunchy/i })).toHaveTextContent('Complexity: Crunchy ×');
+    expect(screen.getByRole('button', { name: /remove price filter: \$5 or less/i })).toHaveTextContent('Price: $5 or less ×');
+    expect(screen.getByRole('button', { name: /remove sort filter: most popular/i })).toHaveTextContent('Sort: Most popular ×');
+    expect(screen.getByRole('button', { name: /remove rating filter: 4.5\+/i })).toHaveTextContent('Rating: 4.5+ ×');
+    expect(screen.getByRole('button', { name: /remove access filter: purchase-only/i })).toHaveTextContent('Access: Purchase-only ×');
+  });
+
   it('lets users remove a single active filter chip', () => {
     mockSearchParams = new URLSearchParams('category=Solo&price=free');
     render(<MarketplaceFilterForm />);
