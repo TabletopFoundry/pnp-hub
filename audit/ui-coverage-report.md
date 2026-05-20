@@ -120,9 +120,9 @@ The primary browse, detail, and designer journeys remain strong, but five fresh 
 | Translate active-filter chips to product-language labels | Implemented | `app/components/marketplace-filter-form.tsx` now maps raw filter values to the same user-facing labels shown in the controls, and `__tests__/components.test.tsx` covers the rendered chip copy and `aria-label`s. |
 | Consolidate marketplace result announcements into one polite region | Implemented | `app/marketplace/page.tsx` now leaves the results summary as the single polite region, `app/components/marketplace-filter-form.tsx` keeps filter-status text visible without another live announcement, and `__tests__/components.test.tsx` verifies the rendered live-region count. |
 | Respect the `review.verified` field in review bylines | Implemented | `app/games/[slug]/page.tsx` now renders review trust copy through `lib/format.ts`, and `__tests__/format.test.ts` covers both verified and unverified bylines. |
-| Replace stale seeded-title count copy in the shell banner | Planned | Pending implementation in `app/layout.tsx`, `lib/constants.ts`, and `__tests__/constants.test.ts`. |
+| Replace stale seeded-title count copy in the shell banner | Implemented | `app/layout.tsx` now renders stable banner copy from `lib/constants.ts`, and `__tests__/constants.test.ts` guards against reintroducing a stale numeric catalog claim. |
 
 ### Validation status
 
 - Baseline validation passed before implementation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
-- Post-remediation validation: pending.
+- Post-remediation validation completed: `npm run lint`, `npm run typecheck`, `npm test` (106 tests), and `npm run build` all passed on the final tree.

@@ -5,6 +5,7 @@ import {
   DESIGNER_REVENUE_SHARE,
   GAME_CATEGORIES,
   PLATFORM_REVENUE_SHARE,
+  SITE_BANNER_MESSAGE,
 } from '@/lib/constants';
 
 describe('revenue split', () => {
@@ -34,5 +35,12 @@ describe('GAME_CATEGORIES', () => {
 describe('ACCESS_TYPES', () => {
   it('contains all expected access types', () => {
     expect(ACCESS_TYPES).toEqual(['free', 'included', 'purchase']);
+  });
+});
+
+describe('SITE_BANNER_MESSAGE', () => {
+  it('avoids stale numeric catalog claims', () => {
+    expect(SITE_BANNER_MESSAGE).toBe('Local-first MVP demo · SQLite-seeded print-and-play catalog');
+    expect(SITE_BANNER_MESSAGE).not.toMatch(/\d+\+\s+print-and-play/i);
   });
 });

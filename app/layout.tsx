@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { MobileNav } from '@/app/components/mobile-nav';
 import { SiteNavLinks, type NavigationItem } from '@/app/components/site-nav-links';
+import { SITE_BANNER_MESSAGE } from '@/lib/constants';
 
 import './globals.css';
 
@@ -44,7 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
         <div className="border-b border-[var(--border-light)] bg-[var(--bg-banner)] backdrop-blur-sm">
           <div className="section-shell flex flex-wrap items-center justify-between gap-4 py-3 text-sm text-[var(--text-secondary)]">
-            <p>Local-first MVP demo · SQLite seeded with 30+ print-and-play titles</p>
+            <p>{SITE_BANNER_MESSAGE}</p>
             <p className="font-medium text-[var(--forest)]">Craft faster. Waste less paper.</p>
           </div>
         </div>
