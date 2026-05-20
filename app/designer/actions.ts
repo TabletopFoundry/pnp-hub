@@ -14,7 +14,7 @@ const VALID_ACCESS_TYPES: readonly AccessType[] = ACCESS_TYPES;
 export async function createDesignerSubmission(formData: FormData): Promise<SubmissionResult> {
   const title = String(formData.get('title') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
-  const category = String(formData.get('category') ?? 'Strategy');
+  const category = String(formData.get('category') ?? '').trim();
   const accessType = String(formData.get('accessType') ?? 'purchase');
   const priceDollars = Number(formData.get('price') ?? '0');
   const files = formData
@@ -25,6 +25,10 @@ export async function createDesignerSubmission(formData: FormData): Promise<Subm
   // Required fields
   if (!title || !description) {
     return { error: 'Please complete the name and description fields.' };
+  }
+
+  if (!category) {
+    return { error: 'Please choose a category before saving your draft.' };
   }
 
   // Length limits

@@ -65,6 +65,7 @@ import { PageBreadcrumbs } from '@/app/components/page-breadcrumbs';
 import { SiteNavLinks } from '@/app/components/site-nav-links';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { TutorialLibrary } from '@/app/components/tutorial-library';
+import { UploadForm } from '@/app/components/upload-form';
 import { getFeaturedGames } from '@/lib/data';
 import type { CraftAlongFeature, DesignerProfile, GameCardView, GameListingView, Tutorial } from '@/lib/types';
 
@@ -472,6 +473,17 @@ describe('DesignerFlash', () => {
     expect(replaceMock).toHaveBeenCalledWith('/designer?tab=recent#my-games', { scroll: false });
     expect(screen.getByRole('link', { name: /jump to my games/i })).toHaveAttribute('href', '#my-games');
     expect(screen.getByRole('button', { name: /dismiss/i })).toBeInTheDocument();
+  });
+});
+
+describe('UploadForm', () => {
+  it('requires an explicit category choice for new drafts', () => {
+    render(<UploadForm />);
+
+    const categorySelect = screen.getByRole('combobox', { name: /category/i });
+    expect(categorySelect).toBeRequired();
+    expect(categorySelect).toHaveValue('');
+    expect(screen.getByRole('option', { name: /select a category/i })).toBeDisabled();
   });
 });
 

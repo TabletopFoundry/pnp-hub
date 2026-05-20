@@ -53,11 +53,13 @@ export function UploadForm({ successHash = 'my-games' }: UploadFormProps) {
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)]">
           Category
-          <select name="category" className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3">
+          <select name="category" required defaultValue="" className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3">
+            <option value="" disabled>Select a category</option>
             {GAME_CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
+          <span className="block text-xs leading-5 text-[var(--text-secondary)]">Pick the catalog shelf reviewers and buyers should expect once this draft goes live.</span>
         </label>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] md:col-span-2">
           Description
