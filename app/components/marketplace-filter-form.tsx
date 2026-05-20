@@ -55,6 +55,7 @@ export function MarketplaceFilterForm() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- URL params are the source of truth after navigation events.
     setQuery(currentFilters.q);
   }, [currentFilters.q]);
 
