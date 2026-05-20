@@ -1,87 +1,78 @@
-# PnP Hub UX Audit — Coverage Report
+# PnP Hub UX Audit — Coverage Report (Pass 3)
 
 ## Summary
 
-Fresh second-pass audit of the current `pnp-hub` state, based on a file inventory sweep (`find . -type f` with standard junk ignored), `package.json`, App Router entry points, shared UI components, and the data/flag surface. The primary routes remain `/` (`app/page.tsx`), `/marketplace` (`app/marketplace/page.tsx`), `/games/[slug]` (`app/games/[slug]/page.tsx`), `/optimizer` (`app/optimizer/page.tsx`), `/designer` (`app/designer/page.tsx`), and `/community` (`app/community/page.tsx`). Shared shell and interaction layers live in `app/layout.tsx`, `app/components/mobile-nav.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/optimizer-tool.tsx`, `app/components/upload-form.tsx`, and `app/components/analytics-chart.tsx`.
+Fresh third-pass UX audit of the current `pnp-hub` state after the prior audit remediations landed in the shell, game-detail, community, and designer flows. This pass re-checked the platform shell (`app/layout.tsx`), the marketplace discovery flow (`app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/game-card.tsx`), the game detail route (`app/games/[slug]/page.tsx`), and high-friction form surfaces (`app/components/upload-form.tsx`, `app/components/mobile-nav.tsx`, `app/error.tsx`). Baseline validation on the pre-change tree succeeded with `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
 
-There is no user-facing feature-flag system gating UI routes. The only environment gate found in this pass is `PNP_HUB_ALLOW_PRODUCTION_SEED` in `lib/db.ts`, which controls demo seeding rather than route exposure. The core discovery loop is covered, but five new actionable UX gaps remain: missing current-route cues in global navigation, no breadcrumb return context on game detail pages, incomplete discovery handoffs in community cards, a post-submit designer flow that still strands users above the inventory table, and a read-only “My games” table that does not help designers open or interpret tracked titles.
+The primary browse, detail, and designer journeys remain strong, but five fresh UX gaps remain: the debounced marketplace search remounts the active input, active-filter chips expose raw URL tokens instead of the labels users chose, marketplace updates are announced through redundant polite live regions, game reviews overstate trust by labelling every reviewer as verified, and the global banner still shows a stale catalog count that now contradicts the README and dynamic homepage stats.
 
 ---
 
-## Phase 1 — Feature Inventory by domain
+## Phase 1 — Feature Inventory by journey
 
 ### Platform shell
-- Global shell, header/footer nav, skip link: `app/layout.tsx`
-- Mobile drawer navigation: `app/components/mobile-nav.tsx`
-- Global loading/error/not-found states: `app/loading.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`
+- Global banner, skip link, sticky header, footer nav: `app/layout.tsx`
+- Mobile drawer navigation and focus trap: `app/components/mobile-nav.tsx`
+- Route-level recovery surfaces: `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`
 
-### Catalog discovery
-- Homepage hero, featured cards, category shortcuts, subscription teaser: `app/page.tsx`, `app/components/game-card.tsx`, `app/components/subscription-grid.tsx`
-- Marketplace search, filters, chips, pagination, empty state: `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/marketplace-pagination.tsx`, `app/components/state-panel.tsx`
+### Marketplace discovery
+- Marketplace hero, results summary, result grid, empty state, pagination: `app/marketplace/page.tsx`
+- Search, filters, active chips, and filter status copy: `app/components/marketplace-filter-form.tsx`
+- Result cards and browse-to-detail CTA: `app/components/game-card.tsx`
 
-### Game detail + print flow
-- Detail hero, gallery, build requirements, reviews, related titles, acquisition panel: `app/games/[slug]/page.tsx`, `app/components/download-button.tsx`, `app/components/game-art.tsx`
-- Optimizer controls, local printer-profile persistence, live print estimates: `app/optimizer/page.tsx`, `app/components/optimizer-tool.tsx`, `lib/constants.ts`
+### Game detail and trust signals
+- Breadcrumb, metadata chips, review list, related titles, acquisition panel: `app/games/[slug]/page.tsx`
+- Review data contract and query surface: `lib/types.ts`, `lib/data.ts`, `lib/seed.ts`
 
-### Designer workspace
-- KPI cards, upload wizard, submission feedback, revenue framing, charts, tracked titles table: `app/designer/page.tsx`, `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/components/analytics-chart.tsx`
+### Designer and supporting forms
+- Draft upload workflow and price entry affordances: `app/components/upload-form.tsx`
+- Existing component and format coverage: `__tests__/components.test.tsx`, `__tests__/format.test.ts`
 
-### Community + learning
-- Craft gallery, monthly spotlight, tutorials, craft-along schedule, designer spotlights: `app/community/page.tsx`, `app/components/craft-along-calendar.tsx`, `app/components/designer-spotlights.tsx`
-- Tutorial metadata and related-game hooks in the data model: `lib/types.ts`, `lib/data.ts`, `docs/PRD.md`
-
-### Validation/tooling surface
-- Project scripts: `package.json`
-- Component tests: `__tests__/components.test.tsx`
-- Data/db/format tests: `__tests__/data.test.ts`, `__tests__/db.test.ts`, `__tests__/format.test.ts`
+### Validation and product framing
+- Project commands: `package.json`
+- Public product framing and seeded dataset claims: `README.md`, `app/page.tsx`, `app/layout.tsx`
 
 ---
 
 ## Phase 2 — UI Coverage table
 
-| Domain | Feature | Coverage | Paths | Notes |
+| Journey | Surface | Coverage | Paths | Notes |
 |---|---|---|---|---|
-| Platform shell | Global shell, header/footer, skip link | Covered | `app/layout.tsx` | Strong base structure across all pages. |
-| Platform shell | Current-route feedback in nav | Partial | `app/layout.tsx`, `app/components/mobile-nav.tsx` | Links exist, but the persistent nav does not expose a dependable current-page state. |
-| Catalog discovery | Homepage browse/optimizer entry points | Covered | `app/page.tsx` | Clear top-level routes into browse and print workflows. |
-| Catalog discovery | Marketplace filtering, chip removal, pagination | Covered | `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/marketplace-pagination.tsx` | Current filter UX is solid. |
-| Catalog discovery | Browse-to-detail return context | Partial | `app/games/[slug]/page.tsx` | Detail pages open without breadcrumb/back context near the top. |
-| Game detail | Overview, gallery, reviews, related titles | Covered | `app/games/[slug]/page.tsx` | Good content density once a user lands on the page. |
-| Optimizer | Printer controls and cost estimates | Covered | `app/optimizer/page.tsx`, `app/components/optimizer-tool.tsx` | Local profile persistence and cost math are already surfaced. |
-| Designer workspace | Draft upload and success feedback | Partial | `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx` | Save confirmation exists, but the handoff to the updated table is still weak. |
-| Designer workspace | Tracked titles table | Partial | `app/designer/page.tsx` | Inventory is visible but effectively read-only. |
-| Community | Tutorial library | Partial | `app/community/page.tsx`, `lib/types.ts`, `docs/PRD.md` | Tutorial cards show labels and summaries, but not the related-game links the data model supports. |
-| Community | Designer spotlights | Partial | `app/components/designer-spotlights.tsx` | Cards show a featured game, but not a broader catalog-discovery path. |
-| Validation | Lint/typecheck/test/build scripts | Covered | `package.json` | All validation commands are defined, but tests require current-environment verification. |
+| Platform shell | Global shell and route framing | Partial | `app/layout.tsx`, `README.md` | Layout structure is strong, but the banner copy still advertises `30+` titles even though the seeded catalog now exceeds that count. |
+| Marketplace discovery | Search and facet controls | Partial | `app/components/marketplace-filter-form.tsx` | Filters exist and persist in the URL, but the debounced search field remounts on push and active chips mirror raw tokens instead of user-facing labels. |
+| Marketplace discovery | Result updates and announcements | Partial | `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx` | Results summary is already polite, yet the page also announces the grid and filter status through additional polite regions. |
+| Game detail | Reviews and trust cues | Partial | `app/games/[slug]/page.tsx`, `lib/types.ts`, `lib/data.ts` | Reviews render clearly, but every byline still claims "verified downloader" even when `review.verified` is false. |
+| Platform framing | Catalog totals and seeded-copy consistency | Partial | `app/layout.tsx`, `app/page.tsx`, `README.md` | Homepage stats and README have moved on; the shell banner has not. |
+| Validation | Automated regression coverage | Covered | `package.json`, `__tests__/components.test.tsx`, `__tests__/format.test.ts` | Lint, typecheck, test, and build commands all exist and pass on the baseline tree. |
 
 ---
 
 ## Phase 3 — UX Quality severities
 
-### 1. Global navigation lacks reliable “you are here” feedback — **Major**
-- **Paths:** `app/layout.tsx`, `app/components/mobile-nav.tsx`
-- **Why it matters:** The sticky shell is always visible, but desktop links render as neutral buttons and the mobile drawer does not expose a semantic current-page state. Users can move between `/marketplace`, `/designer`, `/community`, and deep detail pages without the shell confirming where they are.
-- **Impact:** Orientation cost rises on every route change, especially once users leave the homepage.
+### 1. Debounced marketplace search remounts the focused field — **Major**
+- **Path:** `app/components/marketplace-filter-form.tsx`
+- **What happens:** The search input is keyed by `searchParams.toString()` and uses `defaultValue`, so every debounced `router.push()` remounts the field.
+- **Why it matters:** Users who pause while typing can lose focus and cursor position in the primary catalog search control.
 
-### 2. Game detail pages have no breadcrumb/back-to-marketplace context — **Major**
-- **Path:** `app/games/[slug]/page.tsx`
-- **Why it matters:** Game cards in the homepage, marketplace, and community routes all funnel users into `/games/[slug]`, but the detail page opens directly into the hero grid with no breadcrumb or top-of-page return affordance.
-- **Impact:** Browse → inspect is supported, but inspect → continue browsing is weaker than it should be.
+### 2. Active-filter chips expose raw URL tokens instead of the labels users selected — **Major**
+- **Path:** `app/components/marketplace-filter-form.tsx`
+- **What happens:** Chip copy and `aria-label`s show values such as `heavy`, `under5`, `popular`, and `purchase` rather than `Crunchy`, `$5 or less`, `Most popular`, and `Purchase-only`.
+- **Why it matters:** Users see implementation values instead of product language, and assistive technology announces the same raw tokens.
 
-### 3. Community cards stop short of the next discovery step — **Major**
-- **Paths:** `app/community/page.tsx`, `app/components/designer-spotlights.tsx`, `lib/types.ts`, `lib/data.ts`, `docs/PRD.md`
-- **Why it matters:** `Tutorial.linkedGameSlug` exists in `lib/types.ts`, tutorials are loaded with `linkedGameSlug` in `lib/data.ts`, and the PRD explicitly calls for “related game links” in the tutorial library (`docs/PRD.md`). The current tutorial cards show no related-game CTA, and designer spotlights only expose a single featured title despite displaying total game counts.
-- **Impact:** High-value community surfaces feel inspirational but not actionable.
+### 3. Marketplace updates are announced through three polite live regions — **Major**
+- **Paths:** `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`
+- **What happens:** The results summary, the results section, and the filter-status paragraph all use polite live announcements for the same interaction.
+- **Why it matters:** Screen-reader users receive duplicate or overly verbose updates whenever filters change.
 
-### 4. Designer submit flow still strands users above “My games” — **Major**
-- **Paths:** `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx`
-- **Why it matters:** The upload flow routes to `/designer?submitted=1`, and the flash message tells users to scroll to “My games.” There is no anchored landing point or direct shortcut to the updated inventory section.
-- **Impact:** The only write flow in the app confirms success, but the next step is manual and easy to miss.
+### 4. Review bylines overstate trust by labelling every reviewer as verified — **Major**
+- **Paths:** `app/games/[slug]/page.tsx`, `lib/types.ts`, `lib/data.ts`, `lib/seed.ts`
+- **What happens:** The detail page prints `verified downloader` for every review, even though seeded review rows intentionally contain both `verified: true` and `verified: false`.
+- **Why it matters:** The UI over-promises reviewer verification and weakens trust in the rating surface.
 
-### 5. The tracked-titles table is visible but not useful enough — **Moderate**
-- **Path:** `app/designer/page.tsx`
-- **Why it matters:** The “My games” table lists titles, files, and stats, but offers no direct live-listing link, no next-step guidance per row, and no caption explaining how to interpret published vs draft entries.
-- **Impact:** Designers can see the data, but cannot pivot from analytics to action.
+### 5. The global banner still claims `30+` titles — **Moderate**
+- **Paths:** `app/layout.tsx`, `app/page.tsx`, `README.md`
+- **What happens:** The shell banner says `SQLite seeded with 30+ print-and-play titles`, while `README.md` documents 56 published games and the homepage stat card now uses dynamic counts.
+- **Why it matters:** Users see contradictory catalog totals before they even start browsing.
 
 ---
 
@@ -89,11 +80,11 @@ There is no user-facing feature-flag system gating UI routes. The only environme
 
 | Remediation | Effort | Paths | Planned fix |
 |---|---|---|---|
-| Add current-route states to persistent navigation | S | `app/layout.tsx`, `app/components/mobile-nav.tsx` | Introduce shared route matching plus active styling/`aria-current` in desktop, footer, and mobile nav. |
-| Add breadcrumb return context to game detail pages | S | `app/games/[slug]/page.tsx` | Add a breadcrumb trail that links back to Home and Marketplace before the detail hero. |
-| Turn community cards into real discovery handoffs | S | `app/community/page.tsx`, `app/components/designer-spotlights.tsx`, `lib/types.ts`, `docs/PRD.md` | Surface related-game links on tutorials and add a browse-by-designer catalog path from spotlights. |
-| Land designer submit success on the inventory section | S | `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx` | Add a stable inventory anchor/hash flow plus a visible jump shortcut inside the success flash. |
-| Make the tracked-titles table actionable | S | `app/designer/page.tsx` | Add caption/context and status-aware next-step links for published vs draft rows. |
+| Convert marketplace search to a controlled field | S | `app/components/marketplace-filter-form.tsx`, `__tests__/components.test.tsx` | Replace the keyed uncontrolled search input with local state synced from URL params and cover focus retention after debounced pushes. |
+| Translate active-filter chips to product-language labels | S | `app/components/marketplace-filter-form.tsx`, `__tests__/components.test.tsx` | Centralize value-label maps for chips and chip `aria-label`s so they match the option labels users chose. |
+| Consolidate marketplace result announcements into one polite region | S | `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, `__tests__/components.test.tsx` | Keep the results summary as the single polite announcement and remove redundant polite regions from the grid and filter status copy. |
+| Respect the `review.verified` field in review bylines | S | `app/games/[slug]/page.tsx`, `lib/format.ts`, `__tests__/format.test.ts` | Gate the verified-downloader label on the actual boolean field and add a focused regression test. |
+| Replace stale seeded-title count copy in the shell banner | S | `app/layout.tsx`, `lib/constants.ts`, `__tests__/constants.test.ts` | Swap the hard-coded numeric claim for stable product copy that does not drift from the live catalog. |
 
 ---
 
@@ -103,21 +94,21 @@ There is no user-facing feature-flag system gating UI routes. The only environme
 
 | Rank | Item | Severity | Effort | Paths |
 |---|---|---|---|---|
-| 1 | Add active-state + `aria-current` feedback to global nav | Major | S | `app/layout.tsx`, `app/components/mobile-nav.tsx` |
-| 2 | Add breadcrumb return path on `/games/[slug]` | Major | S | `app/games/[slug]/page.tsx` |
-| 3 | Surface tutorial related-game links and broader designer catalog handoffs | Major | S | `app/community/page.tsx`, `app/components/designer-spotlights.tsx` |
-| 4 | Anchor post-submit success to `My games` | Major | S | `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx` |
-| 5 | Add row-level next steps and context to the tracked-titles table | Moderate | S | `app/designer/page.tsx` |
+| 1 | Convert marketplace search to a controlled field | Major | S | `app/components/marketplace-filter-form.tsx` |
+| 2 | Translate active-filter chips to product-language labels | Major | S | `app/components/marketplace-filter-form.tsx` |
+| 3 | Consolidate marketplace result announcements into one polite region | Major | S | `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx` |
+| 4 | Respect the `review.verified` field in review bylines | Major | S | `app/games/[slug]/page.tsx` |
+| 5 | Replace stale seeded-title count copy in the shell banner | Moderate | S | `app/layout.tsx` |
 
 ### Full stack rank
 
 | Rank | Issue | Why now |
 |---|---|---|
-| 1 | Global navigation lacks reliable current-route feedback | It affects every route and every journey. |
-| 2 | Game detail has no breadcrumb/back context | It breaks the browse → inspect → continue loop. |
-| 3 | Community cards do not hand users into the catalog | The content already exists in data and PRD expectations. |
-| 4 | Designer success flow does not land on the updated inventory | This is the only write flow and should feel finished. |
-| 5 | The tracked-titles table is not actionable enough | Designers need clearer next steps once they reach the dashboard table. |
+| 1 | Debounced marketplace search remounts the focused field | It interferes with the highest-traffic control in the catalog. |
+| 2 | Active-filter chips expose raw URL tokens | It makes the applied state feel technical instead of user-facing. |
+| 3 | Marketplace updates are announced through three polite live regions | It creates unnecessary accessibility noise on every filter change. |
+| 4 | Review bylines overstate verification | Trust copy should never exceed the data. |
+| 5 | The global banner still claims `30+` titles | Contradictory catalog totals are visible on every route. |
 
 ---
 
@@ -125,14 +116,13 @@ There is no user-facing feature-flag system gating UI routes. The only environme
 
 | Remediation | Status | Implementation |
 |---|---|---|
-| Add current-route states to persistent navigation | Implemented | Added shared route matching plus active-state/`aria-current` support in `app/components/site-nav-links.tsx`, wired through `app/layout.tsx`, and aligned mobile behavior in `app/components/mobile-nav.tsx`. |
-| Add breadcrumb return context to game detail pages | Implemented | Added `app/components/page-breadcrumbs.tsx` and surfaced Home → Marketplace → Game breadcrumbs in `app/games/[slug]/page.tsx`. |
-| Turn community cards into real discovery handoffs | Implemented | Added `app/components/tutorial-library.tsx` with related-game/subscription handoffs, updated `app/community/page.tsx`, and added browse-by-designer catalog links in `app/components/designer-spotlights.tsx`. |
-| Land designer submit success on the inventory section | Implemented | Updated `app/components/upload-form.tsx` and `app/components/designer-flash.tsx` to use a stable `#my-games` handoff and visible jump shortcut, then anchored the inventory section from `app/designer/page.tsx`. |
-| Make the tracked-titles table actionable | Implemented | Extracted `app/components/designer-games-table.tsx` with table caption, row-level next steps, and live-listing links for published games. |
+| Convert marketplace search to a controlled field | Planned | Pending implementation in `app/components/marketplace-filter-form.tsx` and `__tests__/components.test.tsx`. |
+| Translate active-filter chips to product-language labels | Planned | Pending implementation in `app/components/marketplace-filter-form.tsx` and `__tests__/components.test.tsx`. |
+| Consolidate marketplace result announcements into one polite region | Planned | Pending implementation in `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, and `__tests__/components.test.tsx`. |
+| Respect the `review.verified` field in review bylines | Planned | Pending implementation in `app/games/[slug]/page.tsx`, `lib/format.ts`, and `__tests__/format.test.ts`. |
+| Replace stale seeded-title count copy in the shell banner | Planned | Pending implementation in `app/layout.tsx`, `lib/constants.ts`, and `__tests__/constants.test.ts`. |
 
-### Test and validation updates
+### Validation status
 
-- Added component coverage for the new breadcrumb, nav, tutorial, designer-table, and success-flash behaviors in `__tests__/components.test.tsx`.
-- Switched Vitest from the failing thread pool to the working fork pool in `vitest.config.ts` so `npm test` succeeds in the current environment.
-- Validation completed with `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
+- Baseline validation passed before implementation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
+- Post-remediation validation: pending.
