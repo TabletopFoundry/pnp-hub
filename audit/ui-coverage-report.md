@@ -118,3 +118,21 @@ There is no user-facing feature-flag system gating UI routes. The only environme
 | 3 | Community cards do not hand users into the catalog | The content already exists in data and PRD expectations. |
 | 4 | Designer success flow does not land on the updated inventory | This is the only write flow and should feel finished. |
 | 5 | The tracked-titles table is not actionable enough | Designers need clearer next steps once they reach the dashboard table. |
+
+---
+
+## Implementation Status
+
+| Remediation | Status | Implementation |
+|---|---|---|
+| Add current-route states to persistent navigation | Implemented | Added shared route matching plus active-state/`aria-current` support in `app/components/site-nav-links.tsx`, wired through `app/layout.tsx`, and aligned mobile behavior in `app/components/mobile-nav.tsx`. |
+| Add breadcrumb return context to game detail pages | Implemented | Added `app/components/page-breadcrumbs.tsx` and surfaced Home → Marketplace → Game breadcrumbs in `app/games/[slug]/page.tsx`. |
+| Turn community cards into real discovery handoffs | Implemented | Added `app/components/tutorial-library.tsx` with related-game/subscription handoffs, updated `app/community/page.tsx`, and added browse-by-designer catalog links in `app/components/designer-spotlights.tsx`. |
+| Land designer submit success on the inventory section | Implemented | Updated `app/components/upload-form.tsx` and `app/components/designer-flash.tsx` to use a stable `#my-games` handoff and visible jump shortcut, then anchored the inventory section from `app/designer/page.tsx`. |
+| Make the tracked-titles table actionable | Implemented | Extracted `app/components/designer-games-table.tsx` with table caption, row-level next steps, and live-listing links for published games. |
+
+### Test and validation updates
+
+- Added component coverage for the new breadcrumb, nav, tutorial, designer-table, and success-flash behaviors in `__tests__/components.test.tsx`.
+- Switched Vitest from the failing thread pool to the working fork pool in `vitest.config.ts` so `npm test` succeeds in the current environment.
+- Validation completed with `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
