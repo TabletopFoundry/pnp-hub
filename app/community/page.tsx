@@ -5,6 +5,7 @@ import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
 import { DesignerSpotlights } from '@/app/components/designer-spotlights';
 import { StatePanel } from '@/app/components/state-panel';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
+import { TutorialLibrary } from '@/app/components/tutorial-library';
 import { getCraftAlongSchedule, getCraftGallery, getDesignerProfiles, getMonthlyCraftGame, getTutorials } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
@@ -70,30 +71,7 @@ export default function CommunityPage() {
               </Link>
             ) : null}
           </div>
-          <div className="paper-panel rounded-[2rem] border border-[var(--border-light)] p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Tutorial library</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">Crafting tutorials</h2>
-            <div className="mt-5 space-y-4">
-              {tutorials.length ? (
-                tutorials.map((tutorial) => (
-                  <article key={tutorial.id} className="rounded-[1.5rem] bg-white/80 p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-[var(--ink)]">{tutorial.title}</h3>
-                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[var(--terracotta)]">{tutorial.difficulty} · {tutorial.estimatedTime} · {tutorial.technique}</p>
-                      </div>
-                      <span className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${tutorial.accessType === 'free' ? 'bg-[var(--bg-forest-tint)] text-[var(--forest)]' : 'bg-[var(--bg-gold-medium)] text-[var(--ink)]'}`}>
-                        {tutorial.accessType === 'free' ? 'Free tutorial' : 'Subscriber tutorial'}
-                      </span>
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-[var(--text-body)]">{tutorial.summary}</p>
-                  </article>
-                ))
-              ) : (
-                <StatePanel title="No tutorials yet" description="Tutorial cards will appear here once content is seeded into the local database." />
-              )}
-            </div>
-          </div>
+          <TutorialLibrary tutorials={tutorials} />
         </div>
       </section>
 

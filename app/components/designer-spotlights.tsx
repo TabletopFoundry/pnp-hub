@@ -56,11 +56,19 @@ export function DesignerSpotlights({ designers }: DesignerSpotlightsProps) {
               <span>•</span>
               <span>{formatCurrency(designer.totalRevenueCents)} revenue</span>
             </div>
-            {designer.featuredGameSlug ? (
-              <Link href={`/games/${designer.featuredGameSlug}`} className="focus-ring mt-4 inline-flex rounded-full border border-[var(--border-medium)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70">
-                View featured game
+            <div className="mt-4 flex flex-wrap gap-3">
+              {designer.featuredGameSlug ? (
+                <Link href={`/games/${designer.featuredGameSlug}`} className="focus-ring inline-flex rounded-full border border-[var(--border-medium)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70">
+                  View featured game
+                </Link>
+              ) : null}
+              <Link
+                href={`/marketplace?q=${encodeURIComponent(designer.name)}`}
+                className="focus-ring inline-flex rounded-full px-4 py-2 text-sm font-semibold text-[var(--forest)] underline-offset-4 hover:underline"
+              >
+                Browse designer catalog
               </Link>
-            ) : null}
+            </div>
           </article>
         ))}
       </div>
