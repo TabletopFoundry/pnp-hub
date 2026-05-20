@@ -18,6 +18,9 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: pushMock, replace: replaceMock, prefetch: vi.fn() }),
   usePathname: () => mockPathname,
   useSearchParams: () => mockSearchParams,
+  notFound: () => {
+    throw new Error('notFound');
+  },
 }));
 
 // --- Mock next/link ---
@@ -46,6 +49,7 @@ vi.mock('recharts', () => {
 });
 
 // --- Imports (after mocks) ---
+import GameDetailPage from '@/app/games/[slug]/page';
 import MarketplacePage from '@/app/marketplace/page';
 import { AnalyticsChart } from '@/app/components/analytics-chart';
 import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
@@ -61,6 +65,7 @@ import { PageBreadcrumbs } from '@/app/components/page-breadcrumbs';
 import { SiteNavLinks } from '@/app/components/site-nav-links';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { TutorialLibrary } from '@/app/components/tutorial-library';
+import { getFeaturedGames } from '@/lib/data';
 import type { CraftAlongFeature, DesignerProfile, GameCardView, GameListingView, Tutorial } from '@/lib/types';
 
 beforeEach(() => {
@@ -418,6 +423,19 @@ describe('TutorialLibrary', () => {
     expect(screen.getByRole('link', { name: /open related game/i })).toHaveAttribute('href', '/games/tea-leaves-thunder');
     expect(screen.getByRole('link', { name: /browse marketplace/i })).toHaveAttribute('href', '/marketplace');
     expect(screen.getByRole('link', { name: /compare support tiers/i })).toHaveAttribute('href', '/community#subscription-comparison');
+    expect(screen.getByRole('heading', { name: /crafting tutorials/i }).closest('section')).toHaveAttribute('id', 'tutorial-library');
+  });
+});
+
+describe('GameDetailPage', () => {
+  it('links the tutorial CTA directly to the tutorial library section', async () => {
+    const game = getFeaturedGames(1)[0];
+    expect(game).toBeDefined();
+
+    const page = await GameDetailPage({ params: Promise.resolve({ slug: game!.slug }) });
+    render(page);
+
+    expect(screen.getByRole('link', { name: /watch tutorials/i })).toHaveAttribute('href', '/community#tutorial-library');
   });
 });
 

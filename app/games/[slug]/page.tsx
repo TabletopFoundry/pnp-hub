@@ -175,7 +175,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
             <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)]">{primaryCta(game)} · latest printable version available now with guided prep notes.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <DownloadButton label={primaryCta(game)} />
-              <Link href="/community" className="focus-ring inline-flex items-center justify-center rounded-full border border-[var(--border-medium)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70">
+              <Link href="/community#tutorial-library" className="focus-ring inline-flex items-center justify-center rounded-full border border-[var(--border-medium)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/70">
                 Watch tutorials
               </Link>
             </div>

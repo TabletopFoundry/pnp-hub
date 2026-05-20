@@ -5,11 +5,12 @@ import type { Tutorial } from '@/lib/types';
 
 type TutorialLibraryProps = {
   tutorials: Tutorial[];
+  sectionId?: string;
 };
 
-export function TutorialLibrary({ tutorials }: TutorialLibraryProps) {
+export function TutorialLibrary({ tutorials, sectionId = 'tutorial-library' }: TutorialLibraryProps) {
   return (
-    <section className="paper-panel rounded-[2rem] border border-[var(--border-light)] p-6">
+    <section id={sectionId} className="paper-panel scroll-mt-28 rounded-[2rem] border border-[var(--border-light)] p-6">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Tutorial library</p>
       <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">Crafting tutorials</h2>
       <div className="mt-5 space-y-4">

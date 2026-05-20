@@ -122,7 +122,7 @@ No `AGENTS.md` or `CLAUDE.md` exists under `pnp-hub`, so this pass follows the r
 | Remediation | Status | Implementation |
 |---|---|---|
 | Clamp marketplace pagination to the last valid page | Implemented | `lib/data.ts` now clamps requested pages to the computed last page, and `__tests__/data.test.ts` verifies stale deep links resolve to live results instead of a false empty state. |
-| Anchor the tutorial CTA to the tutorial library | Pending | Planned across `app/games/[slug]/page.tsx`, `app/components/tutorial-library.tsx`, and `__tests__/components.test.tsx`. |
+| Anchor the tutorial CTA to the tutorial library | Implemented | `app/games/[slug]/page.tsx` now links directly to `#tutorial-library`, `app/components/tutorial-library.tsx` exposes a stable anchored section, and `__tests__/components.test.tsx` covers both the anchor and the CTA target. |
 | Require an explicit category choice for new drafts | Pending | Planned across `app/components/upload-form.tsx`, `app/designer/actions.ts`, `__tests__/components.test.tsx`, and `__tests__/designer-actions.test.ts`. |
 | Explain page resets after marketplace filter changes | Pending | Planned in `app/components/marketplace-filter-form.tsx` with component coverage in `__tests__/components.test.tsx`. |
 | Sync optimizer setup state into the URL | Pending | Planned across `app/optimizer/page.tsx`, `app/components/optimizer-tool.tsx`, and `__tests__/components.test.tsx`. |
