@@ -291,6 +291,17 @@ describe('getMarketplaceGames edge cases', () => {
     expect(result.page).toBe(1);
   });
 
+  it('clamps page number to the last available page when the request is too large', () => {
+    const firstPage = getMarketplaceGames({}, 1, 10);
+    const lastPage = getMarketplaceGames({}, firstPage.totalPages, 10);
+    const outOfRangePage = getMarketplaceGames({}, 999, 10);
+
+    expect(firstPage.totalPages).toBeGreaterThan(0);
+    expect(outOfRangePage.page).toBe(firstPage.totalPages);
+    expect(outOfRangePage.items).toEqual(lastPage.items);
+    expect(outOfRangePage.items.length).toBeGreaterThan(0);
+  });
+
   it('filters by access type', () => {
     const result = getMarketplaceGames({ access: 'free' });
     for (const game of result.items) {
