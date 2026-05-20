@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MobileNav } from '@/app/components/mobile-nav';
+import { SiteNavLinks, type NavigationItem } from '@/app/components/site-nav-links';
 
 import './globals.css';
 
@@ -26,12 +27,12 @@ export const metadata: Metadata = {
   },
 };
 
-const navigation = [
-  { href: '/', label: 'Home' },
-  { href: '/marketplace', label: 'Marketplace' },
-  { href: '/optimizer', label: 'Print Optimizer' },
-  { href: '/designer', label: 'Designer Dashboard' },
-  { href: '/community', label: 'Community' },
+const navigation: NavigationItem[] = [
+  { href: '/', label: 'Home', matchPaths: ['/'] },
+  { href: '/marketplace', label: 'Marketplace', matchPaths: ['/marketplace', '/games'] },
+  { href: '/optimizer', label: 'Print Optimizer', matchPaths: ['/optimizer'] },
+  { href: '/designer', label: 'Designer Dashboard', matchPaths: ['/designer'] },
+  { href: '/community', label: 'Community', matchPaths: ['/community'] },
 ];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -57,11 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </div>
             </Link>
             <nav className="hidden items-center gap-2 text-sm font-medium text-[var(--text-body)] md:flex" aria-label="Main navigation">
-              {navigation.map((item) => (
-                <Link key={item.href} href={item.href} className="focus-ring rounded-full px-4 py-2 transition hover:bg-white/70">
-                  {item.label}
-                </Link>
-              ))}
+              <SiteNavLinks items={navigation} variant="header" />
             </nav>
             <MobileNav items={navigation} />
           </div>
@@ -77,11 +74,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </p>
             </div>
             <nav aria-label="Footer navigation" className="grid gap-3 text-sm text-[var(--text-body)] sm:grid-cols-2">
-              {navigation.map((item) => (
-                <Link key={item.href} href={item.href} className="focus-ring rounded-2xl px-4 py-3 transition hover:bg-white/70">
-                  {item.label}
-                </Link>
-              ))}
+              <SiteNavLinks items={navigation} variant="footer" />
             </nav>
           </div>
         </footer>

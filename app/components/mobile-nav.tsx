@@ -4,8 +4,10 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { isNavigationItemActive, type NavigationItem } from '@/app/components/site-nav-links';
+
 type MobileNavProps = {
-  items: Array<{ href: string; label: string }>;
+  items: NavigationItem[];
 };
 
 export function MobileNav({ items }: MobileNavProps) {
@@ -138,15 +140,20 @@ export function MobileNav({ items }: MobileNavProps) {
                 </svg>
               </button>
             </div>
-            {items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`focus-ring rounded-2xl px-4 py-3 text-sm font-medium transition hover:bg-white/70 ${pathname === item.href ? 'bg-[var(--bg-forest-tint)] text-[var(--forest)]' : 'text-[var(--text-body)]'}`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {items.map((item) => {
+              const active = isNavigationItemActive(pathname, item);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={`focus-ring rounded-2xl px-4 py-3 text-sm font-medium transition ${active ? 'bg-[var(--bg-forest-tint)] text-[var(--forest)]' : 'text-[var(--text-body)] hover:bg-white/70'}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         </>
       ) : null}
