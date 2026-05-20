@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/app/components/download-button';
 import { GameArt } from '@/app/components/game-art';
 import { GameCard } from '@/app/components/game-card';
+import { PageBreadcrumbs } from '@/app/components/page-breadcrumbs';
 import { accessLabel, complexityLabel, displayPrice, playerLabel, primaryCta } from '@/lib/format';
 import { getGameBySlug, getRelatedGames, getReviewsForGame } from '@/lib/data';
 
@@ -35,6 +36,13 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
 
   return (
     <div className="section-shell py-12">
+      <PageBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Marketplace', href: '/marketplace' },
+          { label: game.title },
+        ]}
+      />
       <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
           <div className="paper-panel rounded-[2rem] border border-[var(--border-light)] p-5 sm:p-6">
