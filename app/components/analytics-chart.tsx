@@ -66,25 +66,36 @@ export function AnalyticsChart({ metrics, geography }: AnalyticsChartProps) {
               : 'No download data is available yet.'}
           </p>
         </div>
-        <table className="sr-only">
-          <caption>Downloads over time data table</caption>
-          <thead>
-            <tr>
-              <th scope="col">Day</th>
-              <th scope="col">Downloads</th>
-              <th scope="col">Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {metrics.map((entry) => (
-              <tr key={entry.label}>
-                <th scope="row">{entry.label}</th>
-                <td>{entry.downloads.toLocaleString()}</td>
-                <td>{formatCurrency(entry.revenue)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <details className="mt-4 rounded-[1.4rem] border border-[var(--border-light)] bg-white/70 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-[var(--ink)]">View 14-day data table</summary>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-left text-sm text-[var(--text-body)]">
+              <caption className="pb-3 text-left text-xs font-semibold uppercase tracking-[0.16em] text-[var(--terracotta)]">Downloads over time data table</caption>
+              <thead>
+                <tr className="text-xs uppercase tracking-[0.16em] text-[var(--terracotta)]">
+                  <th scope="col" className="pb-2 pr-4">Day</th>
+                  <th scope="col" className="pb-2 pr-4">Downloads</th>
+                  <th scope="col" className="pb-2">Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {metrics.length ? (
+                  metrics.map((entry) => (
+                    <tr key={entry.label} className="border-t border-[var(--border-light)]">
+                      <th scope="row" className="py-3 pr-4 font-medium text-[var(--ink)]">{entry.label}</th>
+                      <td className="py-3 pr-4">{entry.downloads.toLocaleString()}</td>
+                      <td className="py-3">{formatCurrency(entry.revenue)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="border-t border-[var(--border-light)]">
+                    <td colSpan={3} className="py-3 text-[var(--text-secondary)]">No download rows are available yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </details>
       </figure>
       <figure className="paper-panel rounded-[1.8rem] border border-[var(--border-light)] p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Geographic mix</p>
@@ -109,23 +120,34 @@ export function AnalyticsChart({ metrics, geography }: AnalyticsChartProps) {
               : 'No regional download data is available yet.'}
           </p>
         </div>
-        <table className="sr-only">
-          <caption>Regional downloads data table</caption>
-          <thead>
-            <tr>
-              <th scope="col">Region</th>
-              <th scope="col">Downloads</th>
-            </tr>
-          </thead>
-          <tbody>
-            {geography.map((entry) => (
-              <tr key={entry.region}>
-                <th scope="row">{entry.region}</th>
-                <td>{entry.downloads.toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <details className="mt-4 rounded-[1.4rem] border border-[var(--border-light)] bg-white/70 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-[var(--ink)]">View regional data table</summary>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-left text-sm text-[var(--text-body)]">
+              <caption className="pb-3 text-left text-xs font-semibold uppercase tracking-[0.16em] text-[var(--terracotta)]">Regional downloads data table</caption>
+              <thead>
+                <tr className="text-xs uppercase tracking-[0.16em] text-[var(--terracotta)]">
+                  <th scope="col" className="pb-2 pr-4">Region</th>
+                  <th scope="col" className="pb-2">Downloads</th>
+                </tr>
+              </thead>
+              <tbody>
+                {geography.length ? (
+                  geography.map((entry) => (
+                    <tr key={entry.region} className="border-t border-[var(--border-light)]">
+                      <th scope="row" className="py-3 pr-4 font-medium text-[var(--ink)]">{entry.region}</th>
+                      <td className="py-3">{entry.downloads.toLocaleString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="border-t border-[var(--border-light)]">
+                    <td colSpan={2} className="py-3 text-[var(--text-secondary)]">No regional rows are available yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </details>
       </figure>
     </div>
   );
