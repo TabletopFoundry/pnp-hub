@@ -9,12 +9,13 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const pushMock = vi.fn();
+const replaceMock = vi.fn();
 let mockPathname = '/';
 let mockSearchParams = new URLSearchParams();
 
 // --- Mock next/navigation ---
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: pushMock, replace: vi.fn(), prefetch: vi.fn() }),
+  useRouter: () => ({ push: pushMock, replace: replaceMock, prefetch: vi.fn() }),
   usePathname: () => mockPathname,
   useSearchParams: () => mockSearchParams,
 }));
@@ -55,21 +56,29 @@ vi.mock('recharts', () => {
 });
 
 // --- Imports (after mocks) ---
-import { DownloadButton } from '@/app/components/download-button';
-import { MockActionButton } from '@/app/components/mock-action-button';
 import { AnalyticsChart } from '@/app/components/analytics-chart';
+import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
+import { DesignerFlash } from '@/app/components/designer-flash';
+import { DesignerSpotlights } from '@/app/components/designer-spotlights';
+import { DownloadButton } from '@/app/components/download-button';
 import { GameCard } from '@/app/components/game-card';
 import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form';
 import { MobileNav } from '@/app/components/mobile-nav';
-import type { GameCardView } from '@/lib/types';
+import { MockActionButton } from '@/app/components/mock-action-button';
+import { SubscriptionGrid } from '@/app/components/subscription-grid';
+import type { CraftAlongFeature, DesignerProfile, GameCardView } from '@/lib/types';
 
 beforeEach(() => {
   pushMock.mockReset();
+  replaceMock.mockReset();
   mockPathname = '/';
   mockSearchParams = new URLSearchParams();
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 // --- Test data ---
 
@@ -94,6 +103,35 @@ const mockGame: GameCardView = {
 const navItems = [
   { href: '/', label: 'Home' },
   { href: '/marketplace', label: 'Marketplace' },
+];
+
+const mockSchedule: CraftAlongFeature[] = [
+  {
+    id: 1,
+    monthLabel: 'May',
+    gameSlug: 'festival-of-kites',
+    gameTitle: 'Festival of Kites',
+    theme: 'Bright builds',
+    summary: 'A breezy family build with layered cards and paper banners.',
+    materialFocus: 'Heavy cardstock',
+    isCurrent: true,
+  },
+];
+
+const mockDesigners: DesignerProfile[] = [
+  {
+    slug: 'paper-sparrow-studio',
+    name: 'Paper Sparrow Studio',
+    headline: 'Cozy strategy and family builds',
+    bio: 'Designs approachable print-and-play games with tactile assembly guides.',
+    location: 'Barcelona, ES',
+    specialties: ['Card crafting', 'Solo modes'],
+    joinedAt: '2024-02-11',
+    featuredGameSlug: 'festival-of-kites',
+    gameCount: 4,
+    totalRevenueCents: 54200,
+    totalDownloads: 1820,
+  },
 ];
 
 // --- Tests ---
@@ -172,7 +210,7 @@ describe('MarketplaceFilterForm', () => {
   it('preserves a typed search query when another filter changes', () => {
     render(<MarketplaceFilterForm />);
 
-    fireEvent.change(screen.getByRole('textbox', { name: /search/i }), {
+    fireEvent.change(screen.getByRole('searchbox', { name: /search/i }), {
       target: { value: 'forest fox' },
     });
     fireEvent.change(screen.getByRole('combobox', { name: /category/i }), {
@@ -185,6 +223,65 @@ describe('MarketplaceFilterForm', () => {
     expect(firstPush).toContain('/marketplace?');
     expect(firstPush).toContain('q=forest+fox');
     expect(firstPush).toContain('category=Solo');
+  });
+
+  it('debounces text search updates', () => {
+    vi.useFakeTimers();
+    render(<MarketplaceFilterForm />);
+
+    fireEvent.change(screen.getByRole('searchbox', { name: /search/i }), {
+      target: { value: 'ink saver' },
+    });
+
+    expect(pushMock).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(350);
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock.mock.calls[0]?.[0]).toContain('q=ink+saver');
+  });
+
+  it('lets users remove a single active filter chip', () => {
+    mockSearchParams = new URLSearchParams('category=Solo&price=free');
+    render(<MarketplaceFilterForm />);
+
+    fireEvent.click(screen.getByRole('button', { name: /remove category filter: solo/i }));
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    const nextHref = pushMock.mock.calls[0]?.[0] as string;
+    expect(nextHref).toContain('price=free');
+    expect(nextHref).not.toContain('category=Solo');
+  });
+});
+
+describe('CraftAlongCalendar', () => {
+  it('surfaces the seeded craft-along schedule with game links', () => {
+    render(<CraftAlongCalendar schedule={mockSchedule} />);
+
+    expect(screen.getByText(/full year of planned builds/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open festival of kites/i })).toHaveAttribute('href', '/games/festival-of-kites');
+  });
+});
+
+describe('DesignerSpotlights', () => {
+  it('renders creator spotlights and featured-game links', () => {
+    render(<DesignerSpotlights designers={mockDesigners} />);
+
+    expect(screen.getByText(/paper sparrow studio/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /view featured game/i })).toHaveAttribute('href', '/games/festival-of-kites');
+  });
+});
+
+describe('DesignerFlash', () => {
+  it('announces success and clears the submitted query param from the URL', () => {
+    mockPathname = '/designer';
+    mockSearchParams = new URLSearchParams('submitted=1&tab=recent');
+
+    render(<DesignerFlash submitted />);
+
+    expect(screen.getByRole('status')).toHaveTextContent(/draft saved to sqlite/i);
+    expect(replaceMock).toHaveBeenCalledWith('/designer?tab=recent', { scroll: false });
+    expect(screen.getByRole('button', { name: /dismiss/i })).toBeInTheDocument();
   });
 });
 
@@ -248,5 +345,15 @@ describe('MobileNav', () => {
   it('does not show nav links when closed', () => {
     render(<MobileNav items={navItems} />);
     expect(screen.queryByText('Marketplace')).not.toBeInTheDocument();
+  });
+});
+
+describe('SubscriptionGrid', () => {
+  it('uses route-based CTAs for each tier instead of mock buttons', () => {
+    render(<SubscriptionGrid />);
+
+    expect(screen.getByRole('link', { name: /browse free titles/i })).toHaveAttribute('href', '/marketplace?access=free');
+    expect(screen.getByRole('link', { name: /see included catalog/i })).toHaveAttribute('href', '/marketplace?access=included');
+    expect(screen.getByRole('link', { name: /open premium print workflow/i })).toHaveAttribute('href', '/optimizer');
   });
 });
