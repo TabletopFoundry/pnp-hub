@@ -171,7 +171,7 @@ export function MarketplaceFilterForm() {
         updateFilter('q', query.trim());
       }}
     >
-      <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]" role="status" aria-live="polite">
+      <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]">
         {statusMessage}
       </p>
       <fieldset className="mt-4 grid gap-4 lg:grid-cols-4">

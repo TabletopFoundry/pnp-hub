@@ -27,16 +27,6 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-// --- Mock seed data (needed by GameArt) ---
-vi.mock('@/lib/seed', () => ({
-  categoryColors: {
-    Strategy: '#2d6a4f',
-    Party: '#e07a5f',
-    Family: '#6c63ff',
-    Solo: '#457b9d',
-  },
-}));
-
 vi.mock('recharts', () => {
   const MockContainer = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>;
   const MockSvgChart = ({ children }: { children?: React.ReactNode }) => <svg>{children}</svg>;
@@ -56,6 +46,7 @@ vi.mock('recharts', () => {
 });
 
 // --- Imports (after mocks) ---
+import MarketplacePage from '@/app/marketplace/page';
 import { AnalyticsChart } from '@/app/components/analytics-chart';
 import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
 import { DesignerFlash } from '@/app/components/designer-flash';
@@ -397,6 +388,17 @@ describe('MarketplaceFilterForm', () => {
     const nextHref = pushMock.mock.calls[0]?.[0] as string;
     expect(nextHref).toContain('price=free');
     expect(nextHref).not.toContain('category=Solo');
+  });
+});
+
+describe('MarketplacePage', () => {
+  it('uses a single polite live region for marketplace result updates', async () => {
+    const page = await MarketplacePage({ searchParams: Promise.resolve({}) });
+    const { container } = render(page);
+
+    expect(container.querySelectorAll('[aria-live="polite"]')).toHaveLength(1);
+    expect(container.querySelector('#marketplace-results-summary')).toHaveAttribute('aria-live', 'polite');
+    expect(container.querySelector('section[aria-describedby="marketplace-results-summary"]')).not.toHaveAttribute('aria-live');
   });
 });
 

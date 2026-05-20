@@ -65,7 +65,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
         </Suspense>
       </div>
 
-      <section className="mt-8" aria-live="polite" aria-describedby="marketplace-results-summary">
+      <section className="mt-8" aria-describedby="marketplace-results-summary">
         {result.items.length ? (
           <>
             <h2 className="sr-only">Marketplace results</h2>
