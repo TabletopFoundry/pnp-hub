@@ -59,20 +59,25 @@ vi.mock('recharts', () => {
 import { AnalyticsChart } from '@/app/components/analytics-chart';
 import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
 import { DesignerFlash } from '@/app/components/designer-flash';
+import { DesignerGamesTable } from '@/app/components/designer-games-table';
 import { DesignerSpotlights } from '@/app/components/designer-spotlights';
 import { DownloadButton } from '@/app/components/download-button';
 import { GameCard } from '@/app/components/game-card';
 import { MarketplaceFilterForm } from '@/app/components/marketplace-filter-form';
 import { MobileNav } from '@/app/components/mobile-nav';
 import { MockActionButton } from '@/app/components/mock-action-button';
+import { PageBreadcrumbs } from '@/app/components/page-breadcrumbs';
+import { SiteNavLinks } from '@/app/components/site-nav-links';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
-import type { CraftAlongFeature, DesignerProfile, GameCardView } from '@/lib/types';
+import { TutorialLibrary } from '@/app/components/tutorial-library';
+import type { CraftAlongFeature, DesignerProfile, GameCardView, GameListingView, Tutorial } from '@/lib/types';
 
 beforeEach(() => {
   pushMock.mockReset();
   replaceMock.mockReset();
   mockPathname = '/';
   mockSearchParams = new URLSearchParams();
+  window.location.hash = '';
 });
 
 afterEach(() => {
@@ -101,8 +106,8 @@ const mockGame: GameCardView = {
 };
 
 const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/marketplace', label: 'Marketplace' },
+  { href: '/', label: 'Home', matchPaths: ['/'] },
+  { href: '/marketplace', label: 'Marketplace', matchPaths: ['/marketplace', '/games'] },
 ];
 
 const mockSchedule: CraftAlongFeature[] = [
@@ -131,6 +136,84 @@ const mockDesigners: DesignerProfile[] = [
     gameCount: 4,
     totalRevenueCents: 54200,
     totalDownloads: 1820,
+  },
+];
+
+const mockTutorials: Tutorial[] = [
+  {
+    id: 1,
+    title: 'Card Sleeves on a Budget',
+    difficulty: 'Beginner',
+    estimatedTime: '12 min',
+    thumbnailLabel: 'Sleeves',
+    accessType: 'free',
+    technique: 'Card Craft',
+    linkedGameSlug: 'tea-leaves-thunder',
+    summary: 'Turn plain paper decks into sturdy table-ready cards with cheap sleeves and scrap backing.',
+  },
+  {
+    id: 2,
+    title: 'Ink-Saving Home Printer Settings',
+    difficulty: 'Beginner',
+    estimatedTime: '10 min',
+    thumbnailLabel: 'Printer',
+    accessType: 'subscriber',
+    technique: 'Printer Setup',
+    linkedGameSlug: null,
+    summary: 'Balance saturation, readability, and speed when switching between draft and final runs.',
+  },
+];
+
+const mockListingGames: GameListingView[] = [
+  {
+    ...mockGame,
+    ageRange: '10+',
+    assemblyEffort: 'Low',
+    paperRequirements: '6 sheets',
+    estimatedInk: 'Medium',
+    sheetCount: 6,
+    cutDifficulty: 'Easy',
+    paperStockRecommendation: '200gsm cardstock',
+    cutGuide: 'Straight cuts',
+    previewLayout: '2 cards per row',
+    componentSummary: 'Cards and rules',
+    designerName: 'Paper Sparrow Studio',
+    designerSlug: 'paper-sparrow-studio',
+    revenueCents: 15200,
+    downloadCount: 220,
+    publishedAt: '2024-03-01T00:00:00.000Z',
+    popularity: 98,
+    isFeatured: true,
+    isMonthlyCraft: false,
+    uploadedFiles: ['rules.pdf', 'print-sheets.zip'],
+  },
+  {
+    ...mockGame,
+    id: 2,
+    slug: 'draft-game',
+    title: 'Draft Game',
+    status: 'draft',
+    rating: 0,
+    ratingCount: 0,
+    revenueCents: 0,
+    downloadCount: 0,
+    publishedAt: '2024-04-01T00:00:00.000Z',
+    popularity: 0,
+    isFeatured: false,
+    isMonthlyCraft: false,
+    ageRange: '10+',
+    assemblyEffort: 'Pending',
+    paperRequirements: 'Pending review',
+    estimatedInk: 'Pending analysis',
+    sheetCount: 0,
+    cutDifficulty: 'Pending',
+    paperStockRecommendation: 'Pending review',
+    cutGuide: 'Pending review',
+    previewLayout: 'Pending review',
+    componentSummary: 'Pending review',
+    designerName: 'Paper Sparrow Studio',
+    designerSlug: 'paper-sparrow-studio',
+    uploadedFiles: ['draft-rules.pdf'],
   },
 ];
 
@@ -206,6 +289,35 @@ describe('GameCard', () => {
   });
 });
 
+describe('SiteNavLinks', () => {
+  it('marks the current section with aria-current, including game detail routes mapped to marketplace', () => {
+    mockPathname = '/games/test-game';
+
+    render(<SiteNavLinks items={navItems} variant="header" />);
+
+    expect(screen.getByRole('link', { name: 'Marketplace' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current');
+  });
+});
+
+describe('PageBreadcrumbs', () => {
+  it('renders breadcrumb links and announces the current page', () => {
+    render(
+      <PageBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Marketplace', href: '/marketplace' },
+          { label: 'Test Game' },
+        ]}
+      />
+    );
+
+    expect(screen.getByRole('navigation', { name: /breadcrumb/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Marketplace' })).toHaveAttribute('href', '/marketplace');
+    expect(screen.getByText('Test Game')).toHaveAttribute('aria-current', 'page');
+  });
+});
+
 describe('MarketplaceFilterForm', () => {
   it('preserves a typed search query when another filter changes', () => {
     render(<MarketplaceFilterForm />);
@@ -263,24 +375,48 @@ describe('CraftAlongCalendar', () => {
   });
 });
 
+describe('TutorialLibrary', () => {
+  it('surfaces related game and subscription handoff links from tutorial metadata', () => {
+    render(<TutorialLibrary tutorials={mockTutorials} />);
+
+    expect(screen.getByRole('link', { name: /open related game/i })).toHaveAttribute('href', '/games/tea-leaves-thunder');
+    expect(screen.getByRole('link', { name: /browse marketplace/i })).toHaveAttribute('href', '/marketplace');
+    expect(screen.getByRole('link', { name: /compare support tiers/i })).toHaveAttribute('href', '/community#subscription-comparison');
+  });
+});
+
 describe('DesignerSpotlights', () => {
-  it('renders creator spotlights and featured-game links', () => {
+  it('renders creator spotlights with featured-game and catalog links', () => {
     render(<DesignerSpotlights designers={mockDesigners} />);
 
     expect(screen.getByText(/paper sparrow studio/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /view featured game/i })).toHaveAttribute('href', '/games/festival-of-kites');
+    expect(screen.getByRole('link', { name: /browse designer catalog/i })).toHaveAttribute('href', '/marketplace?q=Paper%20Sparrow%20Studio');
+  });
+});
+
+describe('DesignerGamesTable', () => {
+  it('adds context and next-step links for published and draft games', () => {
+    render(<DesignerGamesTable games={mockListingGames} sectionId="my-games" />);
+
+    expect(screen.getByText(/titles managed by paper sparrow studio/i)).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /open live listing/i })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: /open live listing/i })).toHaveAttribute('href', '/games/test-game');
+    expect(screen.getByText(/awaiting editorial review/i)).toBeInTheDocument();
   });
 });
 
 describe('DesignerFlash', () => {
-  it('announces success and clears the submitted query param from the URL', () => {
+  it('announces success, preserves the hash, and exposes a jump link', () => {
     mockPathname = '/designer';
     mockSearchParams = new URLSearchParams('submitted=1&tab=recent');
+    window.location.hash = '#my-games';
 
     render(<DesignerFlash submitted />);
 
     expect(screen.getByRole('status')).toHaveTextContent(/draft saved to sqlite/i);
-    expect(replaceMock).toHaveBeenCalledWith('/designer?tab=recent', { scroll: false });
+    expect(replaceMock).toHaveBeenCalledWith('/designer?tab=recent#my-games', { scroll: false });
+    expect(screen.getByRole('link', { name: /jump to my games/i })).toHaveAttribute('href', '#my-games');
     expect(screen.getByRole('button', { name: /dismiss/i })).toBeInTheDocument();
   });
 });
@@ -345,6 +481,15 @@ describe('MobileNav', () => {
   it('does not show nav links when closed', () => {
     render(<MobileNav items={navItems} />);
     expect(screen.queryByText('Marketplace')).not.toBeInTheDocument();
+  });
+
+  it('announces the active destination when the drawer is open', () => {
+    mockPathname = '/games/test-game';
+    render(<MobileNav items={navItems} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+
+    expect(screen.getByRole('link', { name: 'Marketplace' })).toHaveAttribute('aria-current', 'page');
   });
 });
 
