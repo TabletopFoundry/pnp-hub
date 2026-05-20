@@ -199,3 +199,24 @@ The biggest coverage gaps are not the headline routes; they are trust and discov
 | 3 | Designer submission feedback loop (#31) | Designer Workspace | [MAJOR] | [PARTIAL] | High post-submit confusion in the only write flow | [S] | Remediation #3 |
 | 4 | Hidden community schedule and designer content (#38, #39) | Community | [MAJOR] | [HIDDEN] | Medium-high discoverability loss for already-seeded content | [S] | Remediation #4 |
 | 5 | Analytics data access beyond hover (#33) | Designer Workspace | [MAJOR] | [PARTIAL] | Medium accessibility gap on decision-support data | [S] | Remediation #5 |
+
+---
+
+## Phase B — Implemented vs Deferred
+
+| Remediation | Status | Implementation summary | Paths |
+|---|---|---|---|
+| Remediation #1 | Implemented | Replaced fake preview/choose-plan buttons with honest route-based CTAs that now send users to real marketplace/community surfaces. | `app/page.tsx`, `app/components/subscription-grid.tsx` |
+| Remediation #2 | Implemented | Refactored marketplace filtering to support debounced live search, removable chips, clearer status text, and results summaries. | `app/components/marketplace-filter-form.tsx`, `app/marketplace/page.tsx`, `__tests__/components.test.tsx` |
+| Remediation #3 | Implemented | Added a focusable dismissible success flash that clears stale query params and clarified how pricing behaves for free/included uploads. | `app/components/designer-flash.tsx`, `app/designer/page.tsx`, `app/components/upload-form.tsx`, `__tests__/components.test.tsx` |
+| Remediation #4 | Implemented | Surfaced the hidden craft-along schedule and designer profile data in the community route through new secondary sections. | `app/community/page.tsx`, `app/components/craft-along-calendar.tsx`, `app/components/designer-spotlights.tsx`, `__tests__/components.test.tsx` |
+| Remediation #5 | Implemented | Added visible chart-data disclosures so analytics values remain available without hover-only tooltips. | `app/components/analytics-chart.tsx`, `__tests__/components.test.tsx` |
+
+### Deferred
+
+- None.
+
+### Validation Notes
+
+- Root lint now ignores generated website artifacts so `eslint` stays focused on source files instead of `website/.docusaurus` / `website/build` output (`eslint.config.mjs`).
+- Post-change verification completed with `npm run lint`, `npm run typecheck`, `CI=1 npm test`, and `npm run build`.
