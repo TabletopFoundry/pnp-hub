@@ -7,7 +7,11 @@ import { createDesignerSubmission, type SubmissionResult } from '@/app/designer/
 import { UploadSubmitButton } from '@/app/components/upload-submit-button';
 import { GAME_CATEGORIES } from '@/lib/constants';
 
-export function UploadForm() {
+type UploadFormProps = {
+  successHash?: string;
+};
+
+export function UploadForm({ successHash = 'my-games' }: UploadFormProps) {
   const router = useRouter();
   const [accessType, setAccessType] = useState('purchase');
   const [price, setPrice] = useState('7');
@@ -23,12 +27,12 @@ export function UploadForm() {
 
   useEffect(() => {
     if (state?.success) {
-      router.push('/designer?submitted=1');
+      router.push(`/designer?submitted=1#${successHash}`);
     }
-  }, [state, router]);
+  }, [router, state, successHash]);
 
   return (
-    <form action={formAction} className="paper-panel rounded-[1.9rem] border border-[var(--border-light)] p-6">
+    <form id="upload-wizard" action={formAction} className="paper-panel rounded-[1.9rem] border border-[var(--border-light)] p-6 scroll-mt-28">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--terracotta)]">Upload wizard</p>

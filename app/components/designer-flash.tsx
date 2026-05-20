@@ -5,9 +5,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 type DesignerFlashProps = {
   submitted?: boolean;
+  targetId?: string;
 };
 
-export function DesignerFlash({ submitted = false }: DesignerFlashProps) {
+export function DesignerFlash({ submitted = false, targetId = 'my-games' }: DesignerFlashProps) {
   const [visible, setVisible] = useState(submitted);
   const router = useRouter();
   const pathname = usePathname();
@@ -23,8 +24,9 @@ export function DesignerFlash({ submitted = false }: DesignerFlashProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('submitted');
     const nextQuery = params.toString();
-    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
-  }, [pathname, router, searchParams, submitted]);
+    const hash = window.location.hash || `#${targetId}`;
+    router.replace(nextQuery ? `${pathname}?${nextQuery}${hash}` : `${pathname}${hash}`, { scroll: false });
+  }, [pathname, router, searchParams, submitted, targetId]);
 
   if (!visible) return null;
 
@@ -41,15 +43,23 @@ export function DesignerFlash({ submitted = false }: DesignerFlashProps) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p id={headingId} className="font-semibold text-[var(--ink)]">Draft saved to SQLite</p>
-          <p className="mt-1 leading-6 text-[var(--text-body)]">Your new submission is ready in the local catalog. Scroll to “My games” to review the draft without keeping a stale query parameter in the URL.</p>
+          <p className="mt-1 leading-6 text-[var(--text-body)]">Your new submission is ready in the local catalog. Use the shortcut below to jump straight to “My games” without keeping a stale query parameter in the URL.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setVisible(false)}
-          className="focus-ring rounded-full border border-[var(--border-medium)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:bg-white/70"
-        >
-          Dismiss
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`#${targetId}`}
+            className="focus-ring rounded-full bg-[var(--forest)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90"
+          >
+            Jump to My games
+          </a>
+          <button
+            type="button"
+            onClick={() => setVisible(false)}
+            className="focus-ring rounded-full border border-[var(--border-medium)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:bg-white/70"
+          >
+            Dismiss
+          </button>
+        </div>
       </div>
     </div>
   );
