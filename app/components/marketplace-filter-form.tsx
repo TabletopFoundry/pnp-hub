@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { GAME_CATEGORIES } from '@/lib/constants';
 
@@ -29,7 +29,6 @@ export function MarketplaceFilterForm() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const searchParamsKey = searchParams.toString();
-  const queryInputRef = useRef<HTMLInputElement>(null);
   const queryDebounceRef = useRef<number | null>(null);
 
   const currentFilters = useMemo<CurrentFilters>(() => {
@@ -46,12 +45,18 @@ export function MarketplaceFilterForm() {
     };
   }, [searchParamsKey]);
 
+  const [query, setQuery] = useState(currentFilters.q);
+
   const clearPendingQuery = useCallback(() => {
     if (queryDebounceRef.current !== null) {
       window.clearTimeout(queryDebounceRef.current);
       queryDebounceRef.current = null;
     }
   }, []);
+
+  useEffect(() => {
+    setQuery(currentFilters.q);
+  }, [currentFilters.q]);
 
   useEffect(() => () => clearPendingQuery(), [clearPendingQuery]);
 
@@ -68,7 +73,7 @@ export function MarketplaceFilterForm() {
       }
 
       const params = new URLSearchParams(searchParamsKey);
-      const nextQuery = options?.preserveDraftQuery ? queryInputRef.current?.value.trim() ?? currentFilters.q : undefined;
+      const nextQuery = options?.preserveDraftQuery ? query.trim() : undefined;
 
       if (nextQuery !== undefined && key !== 'q') {
         if (nextQuery) {
@@ -90,7 +95,7 @@ export function MarketplaceFilterForm() {
 
       pushParams(params);
     },
-    [clearPendingQuery, currentFilters.q, pushParams, searchParamsKey]
+    [clearPendingQuery, pushParams, query, searchParamsKey]
   );
 
   const scheduleQueryUpdate = useCallback((value: string) => {
@@ -128,7 +133,7 @@ export function MarketplaceFilterForm() {
       onSubmit={(event) => {
         event.preventDefault();
         clearPendingQuery();
-        updateFilter('q', queryInputRef.current?.value.trim() ?? '');
+        updateFilter('q', query.trim());
       }}
     >
       <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]" role="status" aria-live="polite">
@@ -140,14 +145,15 @@ export function MarketplaceFilterForm() {
           Search
           <div className="flex gap-3">
             <input
-              key={searchParamsKey}
-              ref={queryInputRef}
               name="q"
               type="search"
-              defaultValue={currentFilters.q}
+              value={query}
               placeholder="Search titles or designers"
               autoComplete="off"
-              onChange={(event) => scheduleQueryUpdate(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                scheduleQueryUpdate(event.target.value);
+              }}
               className="focus-ring w-full rounded-2xl border border-[var(--border-medium)] bg-white/80 px-4 py-3"
             />
             <button

@@ -353,6 +353,29 @@ describe('MarketplaceFilterForm', () => {
     expect(pushMock.mock.calls[0]?.[0]).toContain('q=ink+saver');
   });
 
+  it('keeps focus and value after a debounced search updates the URL state', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<MarketplaceFilterForm />);
+
+    const input = screen.getByRole('searchbox', { name: /search/i });
+    input.focus();
+
+    fireEvent.change(input, {
+      target: { value: 'hello' },
+    });
+
+    vi.advanceTimersByTime(350);
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+
+    mockSearchParams = new URLSearchParams('q=hello');
+    rerender(<MarketplaceFilterForm />);
+
+    const updatedInput = screen.getByRole('searchbox', { name: /search/i });
+    expect(updatedInput).toHaveValue('hello');
+    expect(updatedInput).toHaveFocus();
+  });
+
   it('lets users remove a single active filter chip', () => {
     mockSearchParams = new URLSearchParams('category=Solo&price=free');
     render(<MarketplaceFilterForm />);
