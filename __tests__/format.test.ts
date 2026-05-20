@@ -7,6 +7,7 @@ import {
   playerLabel,
   premiumBadge,
   primaryCta,
+  reviewByline,
 } from '@/lib/format';
 
 describe('formatCurrency', () => {
@@ -73,6 +74,16 @@ describe('displayPrice', () => {
 
   it('returns formatted price for purchase games', () => {
     expect(displayPrice({ accessType: 'purchase', priceCents: 1200 })).toBe('$12');
+  });
+});
+
+describe('reviewByline', () => {
+  it('includes verification copy for verified reviews', () => {
+    expect(reviewByline('Avery', true)).toBe('Avery · verified downloader');
+  });
+
+  it('omits verification copy for unverified reviews', () => {
+    expect(reviewByline('Avery', false)).toBe('Avery');
   });
 });
 

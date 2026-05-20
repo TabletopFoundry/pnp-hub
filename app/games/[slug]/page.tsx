@@ -6,7 +6,7 @@ import { DownloadButton } from '@/app/components/download-button';
 import { GameArt } from '@/app/components/game-art';
 import { GameCard } from '@/app/components/game-card';
 import { PageBreadcrumbs } from '@/app/components/page-breadcrumbs';
-import { accessLabel, complexityLabel, displayPrice, playerLabel, primaryCta } from '@/lib/format';
+import { accessLabel, complexityLabel, displayPrice, playerLabel, primaryCta, reviewByline } from '@/lib/format';
 import { getGameBySlug, getRelatedGames, getReviewsForGame } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
@@ -152,7 +152,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-semibold text-[var(--ink)]">{review.title}</h3>
-                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--terracotta)]">{review.author} · verified downloader</p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--terracotta)]">{reviewByline(review.author, review.verified)}</p>
                       </div>
                       <p className="text-sm font-semibold text-[var(--forest)]" aria-label={`Rating: ${review.rating} out of 5`}><span aria-hidden="true">★</span> {review.rating}</p>
                     </div>
