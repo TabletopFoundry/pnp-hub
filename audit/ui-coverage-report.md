@@ -1,222 +1,120 @@
-# PnP Hub UI Coverage Report
+# PnP Hub UX Audit — Coverage Report
 
 ## Summary
 
-PnP Hub already covers the core discovery journey end-to-end: home → marketplace → game detail → optimizer, plus separate designer and community surfaces. The project is a Next.js App Router app with primary UI entry points at `/` (`app/page.tsx`), `/marketplace` (`app/marketplace/page.tsx`), `/games/[slug]` (`app/games/[slug]/page.tsx`), `/optimizer` (`app/optimizer/page.tsx`), `/designer` (`app/designer/page.tsx`), and `/community` (`app/community/page.tsx`). Shared shell and interaction entry points live in `app/layout.tsx`, `app/components/mobile-nav.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/optimizer-tool.tsx`, and `app/components/upload-form.tsx`.
+Fresh second-pass audit of the current `pnp-hub` state, based on a file inventory sweep (`find . -type f` with standard junk ignored), `package.json`, App Router entry points, shared UI components, and the data/flag surface. The primary routes remain `/` (`app/page.tsx`), `/marketplace` (`app/marketplace/page.tsx`), `/games/[slug]` (`app/games/[slug]/page.tsx`), `/optimizer` (`app/optimizer/page.tsx`), `/designer` (`app/designer/page.tsx`), and `/community` (`app/community/page.tsx`). Shared shell and interaction layers live in `app/layout.tsx`, `app/components/mobile-nav.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/optimizer-tool.tsx`, `app/components/upload-form.tsx`, and `app/components/analytics-chart.tsx`.
 
-No runtime UI feature-flag system is wired into the product surface. The only environment gate found during setup is the production seeding guard `PNP_HUB_ALLOW_PRODUCTION_SEED` in `lib/db.ts`, which affects demo data availability rather than route-level UI exposure.
-
-The biggest coverage gaps are not the headline routes; they are trust and discoverability gaps inside otherwise polished flows. The two most visible problems are fake CTA affordances (`app/page.tsx`, `app/components/subscription-grid.tsx`, `app/components/mock-action-button.tsx`) and partially-hidden secondary data that exists in `lib/data.ts` but never reaches the UI (`getCraftAlongSchedule`, `getDesignerProfiles`). Marketplace filtering and designer submission feedback also work, but both hide important state transitions behind stale UI or URL-driven messages.
+There is no user-facing feature-flag system gating UI routes. The only environment gate found in this pass is `PNP_HUB_ALLOW_PRODUCTION_SEED` in `lib/db.ts`, which controls demo seeding rather than route exposure. The core discovery loop is covered, but five new actionable UX gaps remain: missing current-route cues in global navigation, no breadcrumb return context on game detail pages, incomplete discovery handoffs in community cards, a post-submit designer flow that still strands users above the inventory table, and a read-only “My games” table that does not help designers open or interpret tracked titles.
 
 ---
 
-## Phase 1 — Feature Inventory
+## Phase 1 — Feature Inventory by domain
 
-### Platform Shell
-1. Global navigation shell — sticky header, footer navigation, and skip-link wrapper across every route (`app/layout.tsx`).
-2. Mobile navigation drawer — small-screen dialog navigation with focus trap and Escape handling (`app/components/mobile-nav.tsx`).
-3. Global loading, error, and not-found states — route/global loading, route error, global error, and not-found experiences (`app/loading.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`).
-4. Homepage hero entry points — top-level value proposition with primary links into browsing and optimization (`app/page.tsx`).
-5. Featured game rail — curated game cards pulled from seeded marketplace data (`app/page.tsx`, `app/components/game-card.tsx`).
-6. Category quick links — direct category shortcuts generated from `GAME_CATEGORIES` (`app/page.tsx`, `lib/constants.ts`).
-7. Subscription tier comparison teaser — three subscription cards reused on home/community (`app/components/subscription-grid.tsx`).
-8. Designer onboarding CTA cluster — creator-focused callouts on the homepage hero/footer section (`app/page.tsx`).
+### Platform shell
+- Global shell, header/footer nav, skip link: `app/layout.tsx`
+- Mobile drawer navigation: `app/components/mobile-nav.tsx`
+- Global loading/error/not-found states: `app/loading.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`
 
-### Marketplace
-9. Query search — title/tagline/designer search powered by query params and SQLite LIKE matching (`app/components/marketplace-filter-form.tsx`, `lib/data.ts`).
-10. Faceted filters — category, players, complexity, price, rating, and access controls (`app/components/marketplace-filter-form.tsx`).
-11. Sort controls — newest, popular, rated, and price sorting (`app/components/marketplace-filter-form.tsx`, `lib/data.ts`).
-12. Active filter summary — visible summary chips for the current filter state (`app/components/marketplace-filter-form.tsx`).
-13. Results grid — card-based marketplace browse surface (`app/marketplace/page.tsx`, `app/components/game-card.tsx`).
-14. Pagination — previous/next plus compact page-number navigation (`app/components/marketplace-pagination.tsx`).
-15. Empty-results recovery — resettable empty-state panel when filters return zero titles (`app/marketplace/page.tsx`, `app/components/state-panel.tsx`).
+### Catalog discovery
+- Homepage hero, featured cards, category shortcuts, subscription teaser: `app/page.tsx`, `app/components/game-card.tsx`, `app/components/subscription-grid.tsx`
+- Marketplace search, filters, chips, pagination, empty state: `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/marketplace-pagination.tsx`, `app/components/state-panel.tsx`
 
-### Game Detail
-16. SEO-aware detail route — dynamic metadata per slug (`app/games/[slug]/page.tsx`).
-17. Game overview hero — art, badges, description, and key stats (`app/games/[slug]/page.tsx`, `app/components/game-art.tsx`).
-18. Preview gallery — captioned visual placeholders for game previews (`app/games/[slug]/page.tsx`).
-19. Build requirements — component summary and part list (`app/games/[slug]/page.tsx`).
-20. Print guidance snapshot — paper, ink, cutting, and stock recommendations (`app/games/[slug]/page.tsx`).
-21. Reviews and ratings — average badge plus review feed/fallback (`app/games/[slug]/page.tsx`).
-22. Acquisition panel — pricing, download CTA, and tutorial handoff (`app/games/[slug]/page.tsx`, `app/components/download-button.tsx`).
-23. Related games rail — similar-title recommendations (`app/games/[slug]/page.tsx`).
+### Game detail + print flow
+- Detail hero, gallery, build requirements, reviews, related titles, acquisition panel: `app/games/[slug]/page.tsx`, `app/components/download-button.tsx`, `app/components/game-art.tsx`
+- Optimizer controls, local printer-profile persistence, live print estimates: `app/optimizer/page.tsx`, `app/components/optimizer-tool.tsx`, `lib/constants.ts`
 
-### Print Optimizer
-24. Game picker — choose a seeded title or deep-link from detail view (`app/components/optimizer-tool.tsx`, `app/optimizer/page.tsx`).
-25. Printer profile controls — paper size, color mode, and duplex settings persisted in localStorage (`app/components/optimizer-tool.tsx`, `lib/constants.ts`).
-26. Cost/sheet estimate cards — live calculated print metrics (`app/components/optimizer-tool.tsx`).
-27. Layout preview grid — generated preview-sheet tiles (`app/components/optimizer-tool.tsx`).
-28. Print prep guidance — stock, cutting guidance, and persistence note (`app/components/optimizer-tool.tsx`).
+### Designer workspace
+- KPI cards, upload wizard, submission feedback, revenue framing, charts, tracked titles table: `app/designer/page.tsx`, `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/components/analytics-chart.tsx`
 
-### Designer Workspace
-29. Dashboard summary KPIs — downloads, revenue, rating, and published count cards (`app/designer/page.tsx`).
-30. Upload wizard — form-backed draft submission persisted into SQLite (`app/components/upload-form.tsx`, `app/designer/actions.ts`, `lib/db.ts`).
-31. Submission feedback — success and error messaging after upload (`app/designer/page.tsx`, `app/components/upload-form.tsx`).
-32. Revenue split explainer — designer/platform payout framing (`app/designer/page.tsx`).
-33. Analytics charts — 14-day downloads and geography visuals (`app/designer/page.tsx`, `app/components/analytics-chart.tsx`).
-34. My games manager — current catalog + draft inventory table (`app/designer/page.tsx`).
+### Community + learning
+- Craft gallery, monthly spotlight, tutorials, craft-along schedule, designer spotlights: `app/community/page.tsx`, `app/components/craft-along-calendar.tsx`, `app/components/designer-spotlights.tsx`
+- Tutorial metadata and related-game hooks in the data model: `lib/types.ts`, `lib/data.ts`, `docs/PRD.md`
 
-### Community
-35. Craft gallery — maker showcase cards (`app/community/page.tsx`).
-36. Monthly craft-along spotlight — current featured build with game link (`app/community/page.tsx`).
-37. Tutorial library — seeded tutorial cards with free/subscriber labels (`app/community/page.tsx`).
-38. Full craft-along schedule — full-year schedule exists in the data layer but is not surfaced (`lib/data.ts`).
-39. Designer profiles spotlight/directory — designer profile data exists in the data layer but is not surfaced (`lib/data.ts`).
-
-### Membership / Monetization
-40. Subscription plan enrollment / upgrade path — complete a plan choice from the subscription cards or creator CTA cluster (`app/components/subscription-grid.tsx`, `app/page.tsx`).
+### Validation/tooling surface
+- Project scripts: `package.json`
+- Component tests: `__tests__/components.test.tsx`
+- Data/db/format tests: `__tests__/data.test.ts`, `__tests__/db.test.ts`, `__tests__/format.test.ts`
 
 ---
 
-## Phase 2 — UI Coverage Mapping
+## Phase 2 — UI Coverage table
 
-| # | Feature | Domain | UI Status | Notes |
+| Domain | Feature | Coverage | Paths | Notes |
 |---|---|---|---|---|
-| 1 | Global navigation shell | Platform Shell | [COVERED] | Persistent header/footer plus skip-link in `app/layout.tsx`. |
-| 2 | Mobile navigation drawer | Platform Shell | [COVERED] | Accessible drawer in `app/components/mobile-nav.tsx`. |
-| 3 | Global loading, error, and not-found states | Platform Shell | [COVERED] | Loading/error/not-found screens exist at route and root levels. |
-| 4 | Homepage hero entry points | Platform Shell | [COVERED] | Primary links to `/marketplace` and `/optimizer` in `app/page.tsx`. |
-| 5 | Featured game rail | Platform Shell | [COVERED] | Featured cards rendered from `getFeaturedGames()` on `/`. |
-| 6 | Category quick links | Platform Shell | [COVERED] | Category chips link into `/marketplace?category=...`. |
-| 7 | Subscription tier comparison teaser | Platform Shell | [PARTIAL] | The comparison content is visible, but plan CTAs use `MockActionButton` and do not advance users to a real next step (`app/components/subscription-grid.tsx`). |
-| 8 | Designer onboarding CTA cluster | Platform Shell | [PARTIAL] | One CTA works (`/designer`), but `Preview creator onboarding` is a mock interaction in `app/page.tsx`. |
-| 9 | Query search | Marketplace | [PARTIAL] | Search works after blur/submit, but typed text can sit stale with no live feedback in `app/components/marketplace-filter-form.tsx`. |
-| 10 | Faceted filters | Marketplace | [COVERED] | Full filter set is present and wired to query params. |
-| 11 | Sort controls | Marketplace | [COVERED] | Sort select is available and backed by allowlisted SQL sort keys. |
-| 12 | Active filter summary | Marketplace | [PARTIAL] | Chips are visible but inert; removing one filter requires resetting the whole form. |
-| 13 | Results grid | Marketplace | [COVERED] | Card grid renders paginated marketplace results. |
-| 14 | Pagination | Marketplace | [COVERED] | Previous/next and compact page list preserve current filters. |
-| 15 | Empty-results recovery | Marketplace | [COVERED] | Clear path back to `/marketplace` via `StatePanel`. |
-| 16 | SEO-aware detail route | Game Detail | [COVERED] | `generateMetadata()` maps title/description per slug. |
-| 17 | Game overview hero | Game Detail | [COVERED] | Hero summary, badges, and stats are present. |
-| 18 | Preview gallery | Game Detail | [COVERED] | Gallery placeholders/captions are rendered in `app/games/[slug]/page.tsx`. |
-| 19 | Build requirements | Game Detail | [COVERED] | Component summary and bullet list are surfaced. |
-| 20 | Print guidance snapshot | Game Detail | [COVERED] | Guidance links cleanly into `/optimizer?game=...`. |
-| 21 | Reviews and ratings | Game Detail | [COVERED] | Review list and no-review fallback are present. |
-| 22 | Acquisition panel | Game Detail | [COVERED] | Pricing and tutorial handoff are visible; CTA is intentionally demo-style in `app/components/download-button.tsx`. |
-| 23 | Related games rail | Game Detail | [COVERED] | Related titles are displayed in the sidebar. |
-| 24 | Game picker | Print Optimizer | [COVERED] | Game selection supports deep-linked initialization. |
-| 25 | Printer profile controls | Print Optimizer | [COVERED] | Profile state persists in localStorage. |
-| 26 | Cost/sheet estimate cards | Print Optimizer | [COVERED] | Cost, sheets, and ink update live. |
-| 27 | Layout preview grid | Print Optimizer | [COVERED] | Preview tiles scale with estimated sheet count. |
-| 28 | Print prep guidance | Print Optimizer | [COVERED] | Stock, cutting, and persistence notes are exposed. |
-| 29 | Dashboard summary KPIs | Designer Workspace | [COVERED] | Summary cards render from `getDesignerDashboard()`. |
-| 30 | Upload wizard | Designer Workspace | [COVERED] | Draft creation flow is wired through server actions into SQLite. |
-| 31 | Submission feedback | Designer Workspace | [PARTIAL] | Success relies on `?submitted=1` and persists on refresh; the price field also keeps a stale-looking default when disabled (`app/designer/page.tsx`, `app/components/upload-form.tsx`). |
-| 32 | Revenue split explainer | Designer Workspace | [COVERED] | Revenue share cards are clear and present. |
-| 33 | Analytics charts | Designer Workspace | [PARTIAL] | Visuals exist, but detailed values are effectively hover-first in `app/components/analytics-chart.tsx`. |
-| 34 | My games manager | Designer Workspace | [COVERED] | Catalog/draft inventory is present in a tabular view. |
-| 35 | Craft gallery | Community | [COVERED] | Gallery cards are visible with count badge. |
-| 36 | Monthly craft-along spotlight | Community | [COVERED] | Current spotlight game is visible and linked. |
-| 37 | Tutorial library | Community | [COVERED] | Tutorial cards with access labels are visible. |
-| 38 | Full craft-along schedule | Community | [HIDDEN] | `getCraftAlongSchedule()` exists in `lib/data.ts` but nothing on `/community` exposes it. |
-| 39 | Designer profiles spotlight/directory | Community | [HIDDEN] | `getDesignerProfiles()` exists in `lib/data.ts` but no page uses it. |
-| 40 | Subscription plan enrollment / upgrade path | Membership / Monetization | [MISSING] | Marketing copy implies choosing a plan, but there is no actual next-step flow from the subscription cards or the home creator-preview CTA. |
+| Platform shell | Global shell, header/footer, skip link | Covered | `app/layout.tsx` | Strong base structure across all pages. |
+| Platform shell | Current-route feedback in nav | Partial | `app/layout.tsx`, `app/components/mobile-nav.tsx` | Links exist, but the persistent nav does not expose a dependable current-page state. |
+| Catalog discovery | Homepage browse/optimizer entry points | Covered | `app/page.tsx` | Clear top-level routes into browse and print workflows. |
+| Catalog discovery | Marketplace filtering, chip removal, pagination | Covered | `app/marketplace/page.tsx`, `app/components/marketplace-filter-form.tsx`, `app/components/marketplace-pagination.tsx` | Current filter UX is solid. |
+| Catalog discovery | Browse-to-detail return context | Partial | `app/games/[slug]/page.tsx` | Detail pages open without breadcrumb/back context near the top. |
+| Game detail | Overview, gallery, reviews, related titles | Covered | `app/games/[slug]/page.tsx` | Good content density once a user lands on the page. |
+| Optimizer | Printer controls and cost estimates | Covered | `app/optimizer/page.tsx`, `app/components/optimizer-tool.tsx` | Local profile persistence and cost math are already surfaced. |
+| Designer workspace | Draft upload and success feedback | Partial | `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx` | Save confirmation exists, but the handoff to the updated table is still weak. |
+| Designer workspace | Tracked titles table | Partial | `app/designer/page.tsx` | Inventory is visible but effectively read-only. |
+| Community | Tutorial library | Partial | `app/community/page.tsx`, `lib/types.ts`, `docs/PRD.md` | Tutorial cards show labels and summaries, but not the related-game links the data model supports. |
+| Community | Designer spotlights | Partial | `app/components/designer-spotlights.tsx` | Cards show a featured game, but not a broader catalog-discovery path. |
+| Validation | Lint/typecheck/test/build scripts | Covered | `package.json` | All validation commands are defined, but tests require current-environment verification. |
 
 ---
 
-## Phase 3 — UX Quality Assessment
+## Phase 3 — UX Quality severities
 
-**#7 — Subscription tier comparison teaser** `[CRITICAL]`  
-- Criterion: Feedback / Consistency  
-- Problem: The primary-looking `Choose ...` controls in `app/components/subscription-grid.tsx` are wired to `app/components/mock-action-button.tsx`, so they briefly change label and then reset without navigation, persistence, or an honest explanation of what happens next.  
-- Location: `app/components/subscription-grid.tsx`, route sections on `/` and `/community`.
+### 1. Global navigation lacks reliable “you are here” feedback — **Major**
+- **Paths:** `app/layout.tsx`, `app/components/mobile-nav.tsx`
+- **Why it matters:** The sticky shell is always visible, but desktop links render as neutral buttons and the mobile drawer does not expose a semantic current-page state. Users can move between `/marketplace`, `/designer`, `/community`, and deep detail pages without the shell confirming where they are.
+- **Impact:** Orientation cost rises on every route change, especially once users leave the homepage.
 
-**#8 — Designer onboarding CTA cluster** `[CRITICAL]`  
-- Criterion: Discoverability / Feedback  
-- Problem: The homepage action pair in `app/page.tsx` mixes one real route (`/designer`) with one fake preview action, which makes the second CTA feel broken even though the section otherwise presents a real creator workflow.  
-- Location: `app/page.tsx`, designer CTA section on `/`.
+### 2. Game detail pages have no breadcrumb/back-to-marketplace context — **Major**
+- **Path:** `app/games/[slug]/page.tsx`
+- **Why it matters:** Game cards in the homepage, marketplace, and community routes all funnel users into `/games/[slug]`, but the detail page opens directly into the hero grid with no breadcrumb or top-of-page return affordance.
+- **Impact:** Browse → inspect is supported, but inspect → continue browsing is weaker than it should be.
 
-**#9 — Query search** `[MAJOR]`  
-- Criterion: Discoverability / Feedback  
-- Problem: Search text is only applied on blur or submit in `app/components/marketplace-filter-form.tsx`, so the query box can visually diverge from the actual results/count shown in `app/marketplace/page.tsx`.  
-- Location: `/marketplace`, `app/components/marketplace-filter-form.tsx`.
+### 3. Community cards stop short of the next discovery step — **Major**
+- **Paths:** `app/community/page.tsx`, `app/components/designer-spotlights.tsx`, `lib/types.ts`, `lib/data.ts`, `docs/PRD.md`
+- **Why it matters:** `Tutorial.linkedGameSlug` exists in `lib/types.ts`, tutorials are loaded with `linkedGameSlug` in `lib/data.ts`, and the PRD explicitly calls for “related game links” in the tutorial library (`docs/PRD.md`). The current tutorial cards show no related-game CTA, and designer spotlights only expose a single featured title despite displaying total game counts.
+- **Impact:** High-value community surfaces feel inspirational but not actionable.
 
-**#12 — Active filter summary** `[MAJOR]`  
-- Criterion: Edge cases / Consistency  
-- Problem: Active chips are passive labels instead of controls, so users cannot remove one constraint at a time when debugging a zero-results state; the only recovery shortcut is a full reset link.  
-- Location: `/marketplace`, `app/components/marketplace-filter-form.tsx`.
+### 4. Designer submit flow still strands users above “My games” — **Major**
+- **Paths:** `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx`
+- **Why it matters:** The upload flow routes to `/designer?submitted=1`, and the flash message tells users to scroll to “My games.” There is no anchored landing point or direct shortcut to the updated inventory section.
+- **Impact:** The only write flow in the app confirms success, but the next step is manual and easy to miss.
 
-**#31 — Submission feedback** `[MAJOR]`  
-- Criterion: Feedback / Accessibility  
-- Problem: Success feedback on `/designer` is driven by `?submitted=1`, which survives refreshes and never takes focus. The disabled price field in `app/components/upload-form.tsx` also keeps a default-looking value without clarifying how free/included titles are saved.  
-- Location: `app/designer/page.tsx`, `app/components/upload-form.tsx`.
-
-**#33 — Analytics charts** `[MAJOR]`  
-- Criterion: Accessibility / Edge cases  
-- Problem: `app/components/analytics-chart.tsx` presents the most detailed values through hover-oriented Recharts tooltips; the fallback tables are screen-reader-only, so sighted keyboard users do not get a visible data path.  
-- Location: `/designer`, `app/components/analytics-chart.tsx`.
+### 5. The tracked-titles table is visible but not useful enough — **Moderate**
+- **Path:** `app/designer/page.tsx`
+- **Why it matters:** The “My games” table lists titles, files, and stats, but offers no direct live-listing link, no next-step guidance per row, and no caption explaining how to interpret published vs draft entries.
+- **Impact:** Designers can see the data, but cannot pivot from analytics to action.
 
 ---
 
-## Phase 4 — Remediation Plan
+## Phase 4 — Remediation Plan with effort
 
-**Remediation #1** `[S]`  
-- Description: Replace fake subscription/onboarding buttons with honest route-based CTAs that take users to real next-step surfaces instead of transient mock states.  
-- Target: `app/page.tsx`, `app/components/subscription-grid.tsx`, `/`, `/community`.  
-- UI pattern: Contextual deep-link CTA pattern (real navigation, role-accurate labels, no fake confirmation state).
-
-**Remediation #2** `[S]`  
-- Description: Refactor marketplace search/filter feedback so queries update live, active chips can be removed individually, and users receive explicit “results updating/current filters” cues.  
-- Target: `app/components/marketplace-filter-form.tsx`, `app/marketplace/page.tsx`, `/marketplace`.  
-- UI pattern: Live filter form with removable chips, debounced query updates, and status messaging.
-
-**Remediation #3** `[S]`  
-- Description: Replace URL-bound designer success banners with an accessible flash pattern that clears stale query params, takes focus, and explains how pricing behaves when access is free or included.  
-- Target: `app/designer/page.tsx`, `app/components/upload-form.tsx`, `/designer`.  
-- UI pattern: Dismissible status banner / toast with field-level helper text.
-
-**Remediation #4** `[S]`  
-- Description: Surface hidden community data by adding a visible craft-along calendar and designer spotlight section so seeded content in `lib/data.ts` is reachable through the UI.  
-- Target: `app/community/page.tsx`, `/community`, `lib/data.ts` consumers.  
-- UI pattern: Secondary content rails/cards for hidden inventory.
-
-**Remediation #5** `[S]`  
-- Description: Add visible analytics data disclosures so chart values remain available without hover and empty-data cases still communicate what the panel represents.  
-- Target: `app/components/analytics-chart.tsx`, `/designer`.  
-- UI pattern: Collapsible supporting data tables beneath charts.
+| Remediation | Effort | Paths | Planned fix |
+|---|---|---|---|
+| Add current-route states to persistent navigation | S | `app/layout.tsx`, `app/components/mobile-nav.tsx` | Introduce shared route matching plus active styling/`aria-current` in desktop, footer, and mobile nav. |
+| Add breadcrumb return context to game detail pages | S | `app/games/[slug]/page.tsx` | Add a breadcrumb trail that links back to Home and Marketplace before the detail hero. |
+| Turn community cards into real discovery handoffs | S | `app/community/page.tsx`, `app/components/designer-spotlights.tsx`, `lib/types.ts`, `docs/PRD.md` | Surface related-game links on tutorials and add a browse-by-designer catalog path from spotlights. |
+| Land designer submit success on the inventory section | S | `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx` | Add a stable inventory anchor/hash flow plus a visible jump shortcut inside the success flash. |
+| Make the tracked-titles table actionable | S | `app/designer/page.tsx` | Add caption/context and status-aware next-step links for published vs draft rows. |
 
 ---
 
 ## Phase 5 — Priority Stack Rank
 
-### Quick Wins
+### Quick Wins — Top 5
 
-| Rank | Feature / Gap | Severity | Current Status | Effort | Target |
-|---|---|---|---|---|---|
-| 1 | Subscription plan enrollment / fake choose-plan affordances (#7, #8, #40) | [CRITICAL] | [MISSING]/[PARTIAL] | [S] | `app/components/subscription-grid.tsx`, `app/page.tsx` |
-| 2 | Marketplace search and filter feedback (#9, #12) | [MAJOR] | [PARTIAL] | [S] | `app/components/marketplace-filter-form.tsx`, `app/marketplace/page.tsx` |
-| 3 | Designer submission feedback loop (#31) | [MAJOR] | [PARTIAL] | [S] | `app/designer/page.tsx`, `app/components/upload-form.tsx` |
-| 4 | Hidden community schedule and designer content (#38, #39) | [MAJOR] | [HIDDEN] | [S] | `app/community/page.tsx` |
-| 5 | Analytics data access beyond hover (#33) | [MAJOR] | [PARTIAL] | [S] | `app/components/analytics-chart.tsx` |
+| Rank | Item | Severity | Effort | Paths |
+|---|---|---|---|---|
+| 1 | Add active-state + `aria-current` feedback to global nav | Major | S | `app/layout.tsx`, `app/components/mobile-nav.tsx` |
+| 2 | Add breadcrumb return path on `/games/[slug]` | Major | S | `app/games/[slug]/page.tsx` |
+| 3 | Surface tutorial related-game links and broader designer catalog handoffs | Major | S | `app/community/page.tsx`, `app/components/designer-spotlights.tsx` |
+| 4 | Anchor post-submit success to `My games` | Major | S | `app/components/upload-form.tsx`, `app/components/designer-flash.tsx`, `app/designer/page.tsx` |
+| 5 | Add row-level next steps and context to the tracked-titles table | Moderate | S | `app/designer/page.tsx` |
 
-### Full Stack Rank
+### Full stack rank
 
-| Rank | Feature / Gap | Domain | Severity | UI Status | Impact | Effort | Recommended Fix |
-|---|---|---|---|---|---|---|---|
-| 1 | Subscription plan enrollment / fake choose-plan affordances (#7, #8, #40) | Membership / Platform Shell | [CRITICAL] | [MISSING]/[PARTIAL] | High trust risk on primary CTAs | [S] | Remediation #1 |
-| 2 | Marketplace search and filter feedback (#9, #12) | Marketplace | [MAJOR] | [PARTIAL] | High browse friction on the catalog’s core control surface | [S] | Remediation #2 |
-| 3 | Designer submission feedback loop (#31) | Designer Workspace | [MAJOR] | [PARTIAL] | High post-submit confusion in the only write flow | [S] | Remediation #3 |
-| 4 | Hidden community schedule and designer content (#38, #39) | Community | [MAJOR] | [HIDDEN] | Medium-high discoverability loss for already-seeded content | [S] | Remediation #4 |
-| 5 | Analytics data access beyond hover (#33) | Designer Workspace | [MAJOR] | [PARTIAL] | Medium accessibility gap on decision-support data | [S] | Remediation #5 |
-
----
-
-## Phase B — Implemented vs Deferred
-
-| Remediation | Status | Implementation summary | Paths |
-|---|---|---|---|
-| Remediation #1 | Implemented | Replaced fake preview/choose-plan buttons with honest route-based CTAs that now send users to real marketplace/community surfaces. | `app/page.tsx`, `app/components/subscription-grid.tsx` |
-| Remediation #2 | Implemented | Refactored marketplace filtering to support debounced live search, removable chips, clearer status text, and results summaries. | `app/components/marketplace-filter-form.tsx`, `app/marketplace/page.tsx`, `__tests__/components.test.tsx` |
-| Remediation #3 | Implemented | Added a focusable dismissible success flash that clears stale query params and clarified how pricing behaves for free/included uploads. | `app/components/designer-flash.tsx`, `app/designer/page.tsx`, `app/components/upload-form.tsx`, `__tests__/components.test.tsx` |
-| Remediation #4 | Implemented | Surfaced the hidden craft-along schedule and designer profile data in the community route through new secondary sections. | `app/community/page.tsx`, `app/components/craft-along-calendar.tsx`, `app/components/designer-spotlights.tsx`, `__tests__/components.test.tsx` |
-| Remediation #5 | Implemented | Added visible chart-data disclosures so analytics values remain available without hover-only tooltips. | `app/components/analytics-chart.tsx`, `__tests__/components.test.tsx` |
-
-### Deferred
-
-- None.
-
-### Validation Notes
-
-- Root lint now ignores generated website artifacts so `eslint` stays focused on source files instead of `website/.docusaurus` / `website/build` output (`eslint.config.mjs`).
-- Post-change verification completed with `npm run lint`, `npm run typecheck`, `CI=1 npm test`, and `npm run build`.
+| Rank | Issue | Why now |
+|---|---|---|
+| 1 | Global navigation lacks reliable current-route feedback | It affects every route and every journey. |
+| 2 | Game detail has no breadcrumb/back context | It breaks the browse → inspect → continue loop. |
+| 3 | Community cards do not hand users into the catalog | The content already exists in data and PRD expectations. |
+| 4 | Designer success flow does not land on the updated inventory | This is the only write flow and should feel finished. |
+| 5 | The tracked-titles table is not actionable enough | Designers need clearer next steps once they reach the dashboard table. |
