@@ -395,6 +395,20 @@ describe('MarketplaceFilterForm', () => {
     expect(nextHref).toContain('price=free');
     expect(nextHref).not.toContain('category=Solo');
   });
+
+  it('explains when a filter change returns the catalog to page 1', () => {
+    mockSearchParams = new URLSearchParams('page=3&category=Solo');
+    render(<MarketplaceFilterForm />);
+
+    fireEvent.change(screen.getByRole('combobox', { name: /price/i }), {
+      target: { value: 'free' },
+    });
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock.mock.calls[0]?.[0]).toContain('price=free');
+    expect(pushMock.mock.calls[0]?.[0]).not.toContain('page=');
+    expect(screen.getByText(/returned the catalog to page 1/i)).toBeInTheDocument();
+  });
 });
 
 describe('MarketplacePage', () => {

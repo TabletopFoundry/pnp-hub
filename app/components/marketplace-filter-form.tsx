@@ -30,6 +30,7 @@ export function MarketplaceFilterForm() {
   const [isPending, startTransition] = useTransition();
   const searchParamsKey = searchParams.toString();
   const queryDebounceRef = useRef<number | null>(null);
+  const pageResetNoticeTimeoutRef = useRef<number | null>(null);
 
   const currentFilters = useMemo<CurrentFilters>(() => {
     const params = new URLSearchParams(searchParamsKey);
@@ -46,6 +47,7 @@ export function MarketplaceFilterForm() {
   }, [searchParamsKey]);
 
   const [query, setQuery] = useState(currentFilters.q);
+  const [pageResetNotice, setPageResetNotice] = useState(false);
 
   const clearPendingQuery = useCallback(() => {
     if (queryDebounceRef.current !== null) {
@@ -54,12 +56,31 @@ export function MarketplaceFilterForm() {
     }
   }, []);
 
+  const clearPageResetNoticeTimeout = useCallback(() => {
+    if (pageResetNoticeTimeoutRef.current !== null) {
+      window.clearTimeout(pageResetNoticeTimeoutRef.current);
+      pageResetNoticeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const showPageResetNotice = useCallback(() => {
+    setPageResetNotice(true);
+    clearPageResetNoticeTimeout();
+    pageResetNoticeTimeoutRef.current = window.setTimeout(() => {
+      setPageResetNotice(false);
+      pageResetNoticeTimeoutRef.current = null;
+    }, 2500) as unknown as number;
+  }, [clearPageResetNoticeTimeout]);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- URL params are the source of truth after navigation events.
     setQuery(currentFilters.q);
   }, [currentFilters.q]);
 
-  useEffect(() => () => clearPendingQuery(), [clearPendingQuery]);
+  useEffect(() => () => {
+    clearPendingQuery();
+    clearPageResetNoticeTimeout();
+  }, [clearPageResetNoticeTimeout, clearPendingQuery]);
 
   const pushParams = useCallback((params: URLSearchParams) => {
     startTransition(() => {
@@ -74,6 +95,7 @@ export function MarketplaceFilterForm() {
       }
 
       const params = new URLSearchParams(searchParamsKey);
+      const shouldExplainPageReset = key !== 'page' && params.has('page');
       const nextQuery = options?.preserveDraftQuery ? query.trim() : undefined;
 
       if (nextQuery !== undefined && key !== 'q') {
@@ -94,9 +116,13 @@ export function MarketplaceFilterForm() {
         params.delete('page');
       }
 
+      if (shouldExplainPageReset) {
+        showPageResetNotice();
+      }
+
       pushParams(params);
     },
-    [clearPendingQuery, pushParams, query, searchParamsKey]
+    [clearPendingQuery, pushParams, query, searchParamsKey, showPageResetNotice]
   );
 
   const scheduleQueryUpdate = useCallback((value: string) => {
@@ -175,6 +201,11 @@ export function MarketplaceFilterForm() {
       <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]">
         {statusMessage}
       </p>
+      {pageResetNotice ? (
+        <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
+          Updated filters returned the catalog to page 1 so you can keep browsing live results.
+        </p>
+      ) : null}
       <fieldset className="mt-4 grid gap-4 lg:grid-cols-4">
         <legend className="sr-only">Marketplace filters</legend>
         <label className="space-y-2 text-sm font-medium text-[var(--ink)] lg:col-span-2">
