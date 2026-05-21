@@ -14,9 +14,48 @@ type OptimizerPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+type OptimizerProfile = {
+  paperSize: 'Letter' | 'A4';
+  colorMode: 'Color' | 'B&W';
+  duplex: 'Simplex' | 'Duplex';
+};
+
+function asString(value: string | string[] | undefined) {
+  return typeof value === 'string' ? value : '';
+}
+
+function parsePaperSize(value: string): OptimizerProfile['paperSize'] | undefined {
+  const normalized = value.toLowerCase();
+  if (normalized === 'letter') return 'Letter';
+  if (normalized === 'a4') return 'A4';
+  return undefined;
+}
+
+function parseColorMode(value: string): OptimizerProfile['colorMode'] | undefined {
+  const normalized = value.toLowerCase();
+  if (normalized === 'color') return 'Color';
+  if (normalized === 'bw') return 'B&W';
+  return undefined;
+}
+
+function parseDuplexMode(value: string): OptimizerProfile['duplex'] | undefined {
+  const normalized = value.toLowerCase();
+  if (normalized === 'simplex') return 'Simplex';
+  if (normalized === 'duplex') return 'Duplex';
+  return undefined;
+}
+
 export default async function OptimizerPage({ searchParams }: OptimizerPageProps) {
   const resolved = await searchParams;
-  const initialSlug = typeof resolved.game === 'string' ? resolved.game : undefined;
+  const initialSlug = asString(resolved.game) || undefined;
+  const paperSize = parsePaperSize(asString(resolved.paper));
+  const colorMode = parseColorMode(asString(resolved.color));
+  const duplex = parseDuplexMode(asString(resolved.duplex));
+  const initialProfile: Partial<OptimizerProfile> = {
+    ...(paperSize ? { paperSize } : {}),
+    ...(colorMode ? { colorMode } : {}),
+    ...(duplex ? { duplex } : {}),
+  };
   const games = getOptimizerGames();
 
   return (
@@ -28,7 +67,7 @@ export default async function OptimizerPage({ searchParams }: OptimizerPageProps
           Switch between Letter and A4, compare color and grayscale runs, review paper stock recommendations, and see estimated print costs for any seeded title.
         </p>
       </div>
-      <OptimizerTool games={games} initialSlug={initialSlug} />
+      <OptimizerTool games={games} initialSlug={initialSlug} initialProfile={Object.keys(initialProfile).length ? initialProfile : undefined} />
     </div>
   );
 }

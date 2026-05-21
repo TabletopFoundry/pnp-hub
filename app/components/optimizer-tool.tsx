@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { StatePanel } from '@/app/components/state-panel';
 import {
@@ -19,11 +20,15 @@ import type { OptimizerGame } from '@/lib/types';
 type OptimizerToolProps = {
   games: OptimizerGame[];
   initialSlug?: string;
+  initialProfile?: Partial<PrinterProfile>;
   compact?: boolean;
 };
 
-type PrinterProfile = { paperSize: 'Letter' | 'A4'; colorMode: 'Color' | 'B&W'; duplex: 'Simplex' | 'Duplex' };
+export type PrinterProfile = { paperSize: 'Letter' | 'A4'; colorMode: 'Color' | 'B&W'; duplex: 'Simplex' | 'Duplex' };
 const DEFAULT_PROFILE: PrinterProfile = { paperSize: 'Letter', colorMode: 'Color', duplex: 'Simplex' };
+const PAPER_QUERY_VALUES: Record<PrinterProfile['paperSize'], string> = { Letter: 'letter', A4: 'a4' };
+const COLOR_QUERY_VALUES: Record<PrinterProfile['colorMode'], string> = { Color: 'color', 'B&W': 'bw' };
+const DUPLEX_QUERY_VALUES: Record<PrinterProfile['duplex'], string> = { Simplex: 'simplex', Duplex: 'duplex' };
 
 function isValidProfile(value: unknown): value is PrinterProfile {
   if (typeof value !== 'object' || value === null) return false;
@@ -35,31 +40,66 @@ function isValidProfile(value: unknown): value is PrinterProfile {
   );
 }
 
-export function OptimizerTool({ games, initialSlug, compact = false }: OptimizerToolProps) {
-  const [selectedSlug, setSelectedSlug] = useState(initialSlug ?? games[0]?.slug ?? '');
-  const [profile, setProfile] = useState<PrinterProfile>(DEFAULT_PROFILE);
-  const [mounted, setMounted] = useState(false);
+function resolveInitialProfile(initialProfile?: Partial<PrinterProfile>) {
+  if (initialProfile?.paperSize || initialProfile?.colorMode || initialProfile?.duplex) {
+    return { ...DEFAULT_PROFILE, ...initialProfile };
+  }
 
-  // Load localStorage profile after mount to avoid hydration mismatch
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(PRINTER_PROFILE_STORAGE_KEY);
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate from localStorage on mount
-        if (isValidProfile(parsed)) setProfile(parsed);
+  if (typeof window === 'undefined') {
+    return DEFAULT_PROFILE;
+  }
+
+  try {
+    const saved = window.localStorage.getItem(PRINTER_PROFILE_STORAGE_KEY);
+    if (saved) {
+      const parsed: unknown = JSON.parse(saved);
+      if (isValidProfile(parsed)) {
+        return parsed;
       }
-    } catch { /* ignore malformed data */ }
-    setMounted(true);
-  }, []);
+    }
+  } catch {
+    // Ignore malformed persisted data and continue with defaults.
+  }
+
+  return DEFAULT_PROFILE;
+}
+
+export function OptimizerTool({ games, initialSlug, initialProfile, compact = false }: OptimizerToolProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialSelectedSlug = games.some((game) => game.slug === initialSlug) ? initialSlug : games[0]?.slug ?? '';
+  const [selectedSlug, setSelectedSlug] = useState(initialSelectedSlug);
+  const [profile, setProfile] = useState<PrinterProfile>(() => resolveInitialProfile(initialProfile));
 
   const { paperSize, colorMode, duplex } = profile;
 
-  useEffect(() => {
-    if (mounted) {
-      window.localStorage.setItem(PRINTER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  const syncOptimizerUrl = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (selectedSlug) {
+      params.set('game', selectedSlug);
+    } else {
+      params.delete('game');
     }
-  }, [profile, mounted]);
+
+    params.set('paper', PAPER_QUERY_VALUES[paperSize]);
+    params.set('color', COLOR_QUERY_VALUES[colorMode]);
+    params.set('duplex', DUPLEX_QUERY_VALUES[duplex]);
+
+    const nextQuery = params.toString();
+    if (nextQuery !== searchParams.toString()) {
+      router.replace(`${pathname}${nextQuery ? `?${nextQuery}` : ''}`, { scroll: false });
+    }
+  }, [colorMode, duplex, paperSize, pathname, router, searchParams, selectedSlug]);
+
+  useEffect(() => {
+    window.localStorage.setItem(PRINTER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  }, [profile]);
+
+  useEffect(() => {
+    syncOptimizerUrl();
+  }, [syncOptimizerUrl]);
 
   const selectedGame = useMemo(() => games.find((game) => game.slug === selectedSlug) ?? games[0], [games, selectedSlug]);
 
@@ -193,7 +233,7 @@ export function OptimizerTool({ games, initialSlug, compact = false }: Optimizer
           </div>
           <div>
             <dt className="font-semibold text-[var(--ink)]">Printer profile note</dt>
-            <dd>Your last-used paper size and color mode are remembered locally for the next optimization run.</dd>
+            <dd>Your selected game and printer profile are mirrored in the URL and remembered locally for the next optimization run.</dd>
           </div>
         </dl>
       </div>

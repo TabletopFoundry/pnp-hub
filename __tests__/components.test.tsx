@@ -51,6 +51,7 @@ vi.mock('recharts', () => {
 // --- Imports (after mocks) ---
 import GameDetailPage from '@/app/games/[slug]/page';
 import MarketplacePage from '@/app/marketplace/page';
+import OptimizerPage from '@/app/optimizer/page';
 import { AnalyticsChart } from '@/app/components/analytics-chart';
 import { CraftAlongCalendar } from '@/app/components/craft-along-calendar';
 import { DesignerFlash } from '@/app/components/designer-flash';
@@ -66,6 +67,7 @@ import { SiteNavLinks } from '@/app/components/site-nav-links';
 import { SubscriptionGrid } from '@/app/components/subscription-grid';
 import { TutorialLibrary } from '@/app/components/tutorial-library';
 import { UploadForm } from '@/app/components/upload-form';
+import { OptimizerTool } from '@/app/components/optimizer-tool';
 import { getFeaturedGames } from '@/lib/data';
 import type { CraftAlongFeature, DesignerProfile, GameCardView, GameListingView, Tutorial } from '@/lib/types';
 
@@ -75,6 +77,7 @@ beforeEach(() => {
   mockPathname = '/';
   mockSearchParams = new URLSearchParams();
   window.location.hash = '';
+  window.localStorage.clear();
 });
 
 afterEach(() => {
@@ -158,6 +161,27 @@ const mockTutorials: Tutorial[] = [
     technique: 'Printer Setup',
     linkedGameSlug: null,
     summary: 'Balance saturation, readability, and speed when switching between draft and final runs.',
+  },
+];
+
+const mockOptimizerGames = [
+  {
+    slug: 'forest-glen',
+    title: 'Forest Glen',
+    sheetCount: 8,
+    estimatedInk: 'Medium',
+    paperStockRecommendation: '220gsm cardstock',
+    cutGuide: 'Straight cuts only',
+    previewLayout: '2 cards per row',
+  },
+  {
+    slug: 'river-run',
+    title: 'River Run',
+    sheetCount: 6,
+    estimatedInk: 'Low',
+    paperStockRecommendation: '200gsm cardstock',
+    cutGuide: 'Trim the score track first',
+    previewLayout: 'Fold once after trimming',
   },
 ];
 
@@ -520,6 +544,62 @@ describe('AnalyticsChart', () => {
     expect(screen.getByText(/North America leads with 140 downloads/i)).toBeInTheDocument();
     expect(screen.getByText('Downloads over time data table')).toBeInTheDocument();
     expect(screen.getByText('Regional downloads data table')).toBeInTheDocument();
+  });
+});
+
+describe('OptimizerTool', () => {
+  it('hydrates shared optimizer settings into the controls', () => {
+    mockPathname = '/optimizer';
+    mockSearchParams = new URLSearchParams('game=forest-glen&paper=a4&color=bw&duplex=duplex');
+
+    render(
+      <OptimizerTool
+        games={mockOptimizerGames}
+        initialSlug="forest-glen"
+        initialProfile={{ paperSize: 'A4', colorMode: 'B&W', duplex: 'Duplex' }}
+      />
+    );
+
+    expect(screen.getByRole('combobox', { name: /game/i })).toHaveValue('forest-glen');
+    expect(screen.getByRole('combobox', { name: /paper size/i })).toHaveValue('A4');
+    expect(screen.getByRole('combobox', { name: /color mode/i })).toHaveValue('B&W');
+    expect(screen.getByRole('combobox', { name: /duplex mode/i })).toHaveValue('Duplex');
+  });
+
+  it('mirrors optimizer setup changes into the URL', () => {
+    mockPathname = '/optimizer';
+    mockSearchParams = new URLSearchParams('game=forest-glen&paper=letter&color=color&duplex=simplex');
+
+    render(<OptimizerTool games={mockOptimizerGames} initialSlug="forest-glen" />);
+    replaceMock.mockClear();
+
+    fireEvent.change(screen.getByRole('combobox', { name: /paper size/i }), {
+      target: { value: 'A4' },
+    });
+
+    expect(replaceMock).toHaveBeenCalledWith('/optimizer?game=forest-glen&paper=a4&color=color&duplex=simplex', { scroll: false });
+  });
+});
+
+describe('OptimizerPage', () => {
+  it('passes shareable query params into the optimizer controls', async () => {
+    mockPathname = '/optimizer';
+    mockSearchParams = new URLSearchParams('game=forest-glen&paper=a4&color=bw&duplex=duplex');
+
+    const page = await OptimizerPage({
+      searchParams: Promise.resolve({
+        game: 'forest-glen',
+        paper: 'a4',
+        color: 'bw',
+        duplex: 'duplex',
+      }),
+    });
+
+    render(page);
+
+    expect(screen.getByRole('combobox', { name: /paper size/i })).toHaveValue('A4');
+    expect(screen.getByRole('combobox', { name: /color mode/i })).toHaveValue('B&W');
+    expect(screen.getByRole('combobox', { name: /duplex mode/i })).toHaveValue('Duplex');
   });
 });
 
